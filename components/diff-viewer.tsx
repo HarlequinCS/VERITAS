@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Copy, GitPullRequest, Rows3, SplitSquareHorizontal } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 const VULN_LINES: { n: number; t: string }[] = [
@@ -41,7 +42,7 @@ export function DiffViewer() {
       <header className="flex items-center justify-between gap-2 border-b border-veritas-border-subtle bg-veritas-surface/50 px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
           <span className="font-mono text-[11px] text-slate-300">middleware.ts</span>
-          <span className="rounded-md border border-purple-400/30 bg-purple-400/10 px-1.5 py-0.5 text-[10px] font-semibold text-purple-300">
+          <span className="rounded-md border border-veritas-arc/30 bg-veritas-arc/10 px-1.5 py-0.5 text-[10px] font-semibold text-veritas-arc">
             ✦ AI-drafted
           </span>
           <span className="hidden rounded-md bg-veritas-bg/60 px-1.5 py-0.5 font-mono text-[10px] text-slate-500 sm:inline">
@@ -54,7 +55,7 @@ export function DiffViewer() {
               type="button"
               onClick={() => setMode("split")}
               className={`flex items-center gap-1 rounded-md px-2 py-1 text-[10px] ${
-                mode === "split" ? "bg-cyan-400/15 text-cyan-200" : "text-slate-400"
+                mode === "split" ? "bg-veritas-electric/15 text-veritas-arc" : "text-slate-400"
               }`}
             >
               <SplitSquareHorizontal className="h-3 w-3" /> Split
@@ -63,7 +64,7 @@ export function DiffViewer() {
               type="button"
               onClick={() => setMode("unified")}
               className={`flex items-center gap-1 rounded-md px-2 py-1 text-[10px] ${
-                mode === "unified" ? "bg-cyan-400/15 text-cyan-200" : "text-slate-400"
+                mode === "unified" ? "bg-veritas-electric/15 text-veritas-arc" : "text-slate-400"
               }`}
             >
               <Rows3 className="h-3 w-3" /> Unified
@@ -72,7 +73,7 @@ export function DiffViewer() {
           <button
             type="button"
             onClick={copy}
-            className="inline-flex items-center gap-1.5 rounded-md border border-veritas-border-subtle bg-veritas-bg/60 px-2 py-1 text-[11px] font-semibold text-slate-200 transition hover:border-cyan-400/40 hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-md border border-veritas-border-subtle bg-veritas-bg/60 px-2 py-1 text-[11px] font-semibold text-slate-200 transition hover:border-veritas-electric/40 hover:text-white"
           >
             {copied ? (
               <>
@@ -84,12 +85,12 @@ export function DiffViewer() {
               </>
             )}
           </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 rounded-md bg-neon-mix px-2 py-1 text-[11px] font-semibold text-veritas-bg shadow-glow-cyan transition hover:brightness-110"
+          <Link
+            href="/tickets"
+            className="inline-flex items-center gap-1.5 rounded-md bg-electric-mix px-2 py-1 text-[11px] font-semibold text-veritas-bg shadow-glow-electric transition hover:brightness-110"
           >
             <GitPullRequest className="h-3 w-3" /> Apply via PR
-          </button>
+          </Link>
         </div>
       </header>
 

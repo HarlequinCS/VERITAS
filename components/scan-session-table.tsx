@@ -51,7 +51,7 @@ const SESSIONS = [
 
 function statusBadge(s: string) {
   if (s === "Running")
-    return "border-cyan-400/40 bg-cyan-400/10 text-cyan-300";
+    return "border-veritas-electric/40 bg-veritas-electric/10 text-veritas-electric";
   if (s === "Completed")
     return "border-emerald-400/40 bg-emerald-400/10 text-emerald-300";
   return "border-rose-400/40 bg-rose-400/10 text-rose-300";
@@ -67,7 +67,7 @@ export function ScanSessionTable() {
         </div>
         <Link
           href="/scans/live"
-          className="flex items-center gap-1 rounded-lg border border-veritas-border-subtle bg-veritas-surface/40 px-2.5 py-1.5 text-xs font-medium text-slate-300 transition hover:border-cyan-400/40 hover:text-white"
+          className="flex items-center gap-1 rounded-lg border border-veritas-border-subtle bg-veritas-surface/40 px-2.5 py-1.5 text-xs font-medium text-slate-300 transition hover:border-veritas-electric/40 hover:text-white"
         >
           View all
           <ChevronRight className="h-3.5 w-3.5" />
@@ -97,9 +97,9 @@ export function ScanSessionTable() {
                   <div className="flex items-center gap-2.5">
                     <span className="flex h-7 w-7 items-center justify-center rounded-md bg-veritas-surface ring-1 ring-veritas-border-strong">
                       {s.mode === "White Box" ? (
-                        <FileCode className="h-3.5 w-3.5 text-purple-300" />
+                        <FileCode className="h-3.5 w-3.5 text-veritas-arc" />
                       ) : (
-                        <Crosshair className="h-3.5 w-3.5 text-cyan-300" />
+                        <Crosshair className="h-3.5 w-3.5 text-veritas-electric" />
                       )}
                     </span>
                     <div className="min-w-0">
@@ -131,8 +131,8 @@ export function ScanSessionTable() {
                   >
                     {s.status === "Running" && (
                       <span className="relative flex h-1.5 w-1.5">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400/60" />
-                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-veritas-electric/60" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-veritas-electric" />
                       </span>
                     )}
                     {s.status}
@@ -141,7 +141,7 @@ export function ScanSessionTable() {
                 <td className="px-3 py-3 text-right">
                   <Link
                     href="/vulnerabilities/cwe-285"
-                    className="inline-flex items-center gap-1 rounded-md border border-transparent px-2 py-1 text-xs text-slate-400 opacity-0 transition group-hover:opacity-100 hover:border-cyan-400/40 hover:text-cyan-200"
+                    className="inline-flex items-center gap-1 rounded-md border border-transparent px-2 py-1 text-xs text-slate-400 opacity-0 transition group-hover:opacity-100 hover:border-veritas-electric/40 hover:text-veritas-arc"
                   >
                     Open
                     <ChevronRight className="h-3 w-3" />

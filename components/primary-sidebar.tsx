@@ -93,7 +93,7 @@ export function PrimarySidebar() {
               height={22}
               className="object-contain"
             />
-            <span className="absolute -inset-0.5 rounded-lg bg-cyan-500/20 opacity-0 blur transition group-hover:opacity-100" />
+            <span className="absolute -inset-0.5 rounded-lg bg-veritas-electric/20 opacity-0 blur transition group-hover:opacity-100" />
           </span>
           {!collapsed && (
             <span className="font-semibold tracking-[0.18em] text-white">
@@ -142,19 +142,19 @@ export function PrimarySidebar() {
                       {active && (
                         <span
                           aria-hidden
-                          className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-r bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]"
+                          className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-r bg-veritas-electric shadow-[0_0_8px_rgba(34,211,238,0.6)]"
                         />
                       )}
                       <Icon
                         className={`h-4 w-4 shrink-0 ${
-                          active ? "text-cyan-300" : "text-slate-500 group-hover:text-slate-200"
+                          active ? "text-veritas-electric" : "text-slate-500 group-hover:text-slate-200"
                         }`}
                       />
                       {!collapsed && (
                         <>
                           <span className="flex-1 truncate">{item.label}</span>
                           {item.badge && (
-                            <span className="rounded-full border border-veritas-border-strong bg-veritas-bg px-1.5 py-0.5 text-[10px] font-semibold text-cyan-300">
+                            <span className="rounded-full border border-veritas-border-strong bg-veritas-bg px-1.5 py-0.5 text-[10px] font-semibold text-veritas-electric">
                               {item.badge}
                             </span>
                           )}
@@ -173,19 +173,19 @@ export function PrimarySidebar() {
         {collapsed ? (
           <div className="flex justify-center">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-veritas-surface ring-1 ring-veritas-border-strong">
-              <Zap className="h-3.5 w-3.5 text-cyan-300" />
+              <Zap className="h-3.5 w-3.5 text-veritas-electric" />
             </span>
           </div>
         ) : (
           <Link
             href="/scans/live"
-            className="flex items-center gap-2.5 rounded-lg border border-veritas-border-subtle bg-veritas-surface/60 p-2.5 transition hover:border-cyan-400/30 hover:bg-veritas-surface-alt"
+            className="flex items-center gap-2.5 rounded-lg border border-veritas-border-subtle bg-veritas-surface/60 p-2.5 transition hover:border-veritas-electric/30 hover:bg-veritas-surface-alt"
           >
             <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-veritas-bg ring-1 ring-veritas-border-strong">
-              <Crosshair className="h-3.5 w-3.5 text-cyan-300" />
+              <Crosshair className="h-3.5 w-3.5 text-veritas-electric" />
               <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
-                <span className="absolute h-2 w-2 animate-ping rounded-full bg-cyan-400/60" />
-                <span className="h-2 w-2 rounded-full bg-cyan-400" />
+                <span className="absolute h-2 w-2 animate-ping rounded-full bg-veritas-electric/60" />
+                <span className="h-2 w-2 rounded-full bg-veritas-electric" />
               </span>
             </span>
             <div className="min-w-0 flex-1">

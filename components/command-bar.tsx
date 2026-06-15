@@ -99,20 +99,20 @@ export function CommandBar() {
             Operational
           </span>
 
-          <button
-            type="button"
-            className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-veritas-border-subtle text-slate-400 transition hover:border-cyan-400/40 hover:bg-veritas-surface hover:text-white"
+          <Link
+            href="/notifications"
+            className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-veritas-border-subtle text-slate-400 transition hover:border-veritas-electric/40 hover:bg-veritas-surface hover:text-white"
             aria-label="Notifications"
           >
             <Bell className="h-4 w-4" />
             <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white">
               3
             </span>
-          </button>
+          </Link>
 
-          <button
-            type="button"
-            className="hidden h-9 items-center gap-2 rounded-lg border border-veritas-border-subtle px-2 transition hover:border-cyan-400/40 hover:bg-veritas-surface sm:flex"
+          <Link
+            href="/account"
+            className="hidden h-9 items-center gap-2 rounded-lg border border-veritas-border-subtle px-2 transition hover:border-veritas-electric/40 hover:bg-veritas-surface sm:flex"
             aria-label="User menu"
           >
             <span className="relative flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-veritas-surface ring-1 ring-veritas-border-strong">
@@ -129,10 +129,10 @@ export function CommandBar() {
                 Maya Khoury
               </span>
               <span className="block text-[10px] leading-tight text-slate-500">
-                Admin · Acme
+                Lead · Acme
               </span>
             </span>
-          </button>
+          </Link>
         </div>
       </header>
 
@@ -176,7 +176,7 @@ export function CommandBar() {
                   className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-veritas-surface hover:text-white"
                 >
                   <span className="flex items-center gap-2.5">
-                    <ShieldCheck className="h-3.5 w-3.5 text-cyan-300" />
+                    <ShieldCheck className="h-3.5 w-3.5 text-veritas-electric" />
                     {cmd.label}
                   </span>
                   <ChevronRight className="h-3.5 w-3.5 text-slate-600" />

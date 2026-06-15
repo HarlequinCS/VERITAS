@@ -8,7 +8,7 @@ const STYLES: Record<Severity, string> = {
   high: "border-rose-400/40 bg-rose-400/10 text-rose-200",
   medium: "border-amber-400/40 bg-amber-400/10 text-amber-200",
   low: "border-yellow-400/40 bg-yellow-400/10 text-yellow-200",
-  info: "border-cyan-400/40 bg-cyan-400/10 text-cyan-200",
+  info: "border-veritas-electric/40 bg-veritas-electric/10 text-veritas-arc",
 };
 
 const LABELS: Record<Severity, string> = {
@@ -48,7 +48,7 @@ export function SeverityBadge({
                 ? "bg-amber-300"
                 : severity === "low"
                   ? "bg-yellow-300"
-                  : "bg-cyan-300"
+                  : "bg-veritas-electric"
         } ${size === "sm" ? "h-1 w-1" : "h-1.5 w-1.5"}`}
       />
       {children ?? LABELS[severity]}

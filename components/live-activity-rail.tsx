@@ -76,10 +76,10 @@ const ITEMS: Activity[] = [
 ];
 
 const TONE: Record<Activity["tone"], string> = {
-  info: "text-cyan-300 bg-cyan-400/10 ring-cyan-400/30",
+  info: "text-veritas-electric bg-veritas-electric/10 ring-veritas-electric/30",
   warn: "text-amber-300 bg-amber-400/10 ring-amber-400/30",
   danger: "text-rose-300 bg-rose-400/10 ring-rose-400/30",
-  ai: "text-purple-300 bg-purple-400/10 ring-purple-400/30",
+  ai: "text-veritas-arc bg-veritas-arc/10 ring-veritas-arc/30",
   success: "text-emerald-300 bg-emerald-400/10 ring-emerald-400/30",
 };
 
@@ -91,10 +91,10 @@ export function LiveActivityRail() {
           <h3 className="text-sm font-semibold text-white">Real-time activity</h3>
           <p className="text-[11px] text-slate-500">Streaming · all agents</p>
         </div>
-        <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-cyan-300">
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-veritas-electric">
           <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400/60" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-veritas-electric/60" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-veritas-electric" />
           </span>
           Live
         </span>
@@ -115,7 +115,7 @@ export function LiveActivityRail() {
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-xs text-slate-300">
-                  <span className="font-mono text-cyan-300/80">{it.agent}</span>{" "}
+                  <span className="font-mono text-veritas-electric/80">{it.agent}</span>{" "}
                   <span className="text-slate-400">{it.action}</span>{" "}
                   <span className="font-mono text-white">{it.target}</span>
                 </p>

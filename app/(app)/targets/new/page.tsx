@@ -22,26 +22,26 @@ type Intensity = "Light" | "Standard" | "Aggressive";
 const PHASES = [
   {
     id: 1,
-    name: "Static / Dynamic Triage",
-    detail: "Maps routes, identifies tech stack, fingerprints auth surface.",
+    name: "Create scan session",
+    detail: "Validates request, creates a Pending session, and queues the job in Redis.",
     eta: "≈ 90s",
   },
   {
     id: 2,
-    name: "AI Exploit Generation",
-    detail: "LLM-driven hypothesis creation with adversarial payload synthesis.",
+    name: "Playwright simulation",
+    detail: "Launches an isolated Chromium context, injects auth state, and executes test payloads.",
     eta: "≈ 2m",
   },
   {
     id: 3,
-    name: "Playwright Simulation",
-    detail: "Headless browser executes payloads under controlled conditions.",
+    name: "Trace and evidence capture",
+    detail: "Stores response snippets, DOM changes, exploit status, and visual PoC screenshots.",
     eta: "≈ 3m",
   },
   {
     id: 4,
-    name: "AI Analysis",
-    detail: "Synthesizes evidence, drafts root cause and remediation patches.",
+    name: "AI analysis and ticketing",
+    detail: "Classifies CWE/OWASP, drafts a patch, validates the output, and prepares assignment.",
     eta: "≈ 90s",
   },
 ];
@@ -73,14 +73,15 @@ export default function TargetSetupPage() {
   return (
     <main className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <header className="mb-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-veritas-electric/80">
           New target
         </p>
         <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
           Configure scan target
         </h1>
         <p className="mt-1 text-sm text-slate-400">
-          Define a target and launch a hybrid scan. Phases run in sequence with live observability.
+          Define a web app target and launch an asynchronous Hybrid DAST scan.
+          Solo users get patch guidance; teams get assignable remediation work.
         </p>
       </header>
 
@@ -92,8 +93,8 @@ export default function TargetSetupPage() {
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Acme Production Web"
-                className="h-11 w-full rounded-xl border border-veritas-border-subtle bg-veritas-surface/40 px-3.5 text-sm text-white outline-none placeholder:text-slate-600 focus:border-cyan-400/50 focus:shadow-glow-cyan"
+                placeholder="My SaaS Staging App"
+                className="h-11 w-full rounded-xl border border-veritas-border-subtle bg-veritas-surface/40 px-3.5 text-sm text-white outline-none placeholder:text-slate-600 focus:border-veritas-electric/50 focus:shadow-glow-electric"
               />
             </Field>
 
@@ -107,7 +108,7 @@ export default function TargetSetupPage() {
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="https://app.acme.io"
-                  className="h-11 w-full rounded-xl border border-veritas-border-subtle bg-veritas-surface/40 pl-10 pr-12 font-mono text-sm text-white outline-none placeholder:text-slate-600 focus:border-cyan-400/50 focus:shadow-glow-cyan"
+                  className="h-11 w-full rounded-xl border border-veritas-border-subtle bg-veritas-surface/40 pl-10 pr-12 font-mono text-sm text-white outline-none placeholder:text-slate-600 focus:border-veritas-electric/50 focus:shadow-glow-electric"
                 />
                 <span
                   className={`absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
@@ -189,7 +190,7 @@ export default function TargetSetupPage() {
                 <div className="border-t border-veritas-border-subtle px-4 py-5 space-y-5 animate-fade-up">
                   <Field
                     label="Auth token"
-                    hint="Short-lived bearer token. Stored encrypted, redacted in logs."
+                    hint="JWT or bearer token injected into the ephemeral browser context."
                   >
                     <div className="relative">
                       <input
@@ -197,7 +198,7 @@ export default function TargetSetupPage() {
                         value={token}
                         onChange={(e) => setToken(e.target.value)}
                         placeholder="eyJhbGciOiJIUzI1NiIs..."
-                        className="h-11 w-full rounded-xl border border-veritas-border-subtle bg-veritas-bg/60 pr-10 pl-3.5 font-mono text-xs text-white outline-none placeholder:text-slate-600 focus:border-cyan-400/50"
+                        className="h-11 w-full rounded-xl border border-veritas-border-subtle bg-veritas-bg/60 pr-10 pl-3.5 font-mono text-xs text-white outline-none placeholder:text-slate-600 focus:border-veritas-electric/50"
                       />
                       <button
                         type="button"
@@ -216,14 +217,14 @@ export default function TargetSetupPage() {
 
                   <Field
                     label="Cookies / session"
-                    hint="Paste from a browser session. Cookies are scoped to this scan only."
+                    hint="Session cookies are scoped to this scan and discarded after teardown."
                   >
                     <textarea
                       value={cookies}
                       onChange={(e) => setCookies(e.target.value)}
                       placeholder="session=eyJhbGciOiJIUzI1NiJ9...; theme=dark"
                       rows={4}
-                      className="w-full rounded-xl border border-veritas-border-subtle bg-veritas-bg/60 p-3 font-mono text-xs text-white outline-none placeholder:text-slate-600 focus:border-cyan-400/50"
+                      className="w-full rounded-xl border border-veritas-border-subtle bg-veritas-bg/60 p-3 font-mono text-xs text-white outline-none placeholder:text-slate-600 focus:border-veritas-electric/50"
                     />
                   </Field>
 
@@ -244,7 +245,7 @@ export default function TargetSetupPage() {
                                   ? "bg-rose-500/15 text-rose-200 ring-1 ring-rose-400/40"
                                   : i === "Standard"
                                     ? "bg-amber-500/15 text-amber-200 ring-1 ring-amber-400/40"
-                                    : "bg-cyan-500/15 text-cyan-200 ring-1 ring-cyan-400/40"
+                                    : "bg-veritas-electric/15 text-veritas-arc ring-1 ring-veritas-electric/40"
                                 : "text-slate-400 hover:text-white"
                             }`}
                           >
@@ -282,7 +283,7 @@ export default function TargetSetupPage() {
             <button
               type="button"
               onClick={handleStart}
-              className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-neon-mix font-semibold text-veritas-bg shadow-glow-cyan transition hover:brightness-110"
+              className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-electric-mix font-semibold text-veritas-bg shadow-glow-electric transition hover:brightness-110"
             >
               <Rocket className="h-4 w-4" />
               Start hybrid scan
@@ -294,8 +295,8 @@ export default function TargetSetupPage() {
         <aside className="lg:col-span-4">
           <div className="glass sticky top-20 rounded-2xl p-5">
             <header className="flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-400/10 ring-1 ring-purple-400/30">
-                <Workflow className="h-3.5 w-3.5 text-purple-300" />
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-veritas-arc/10 ring-1 ring-veritas-arc/30">
+                <Workflow className="h-3.5 w-3.5 text-veritas-arc" />
               </span>
               <h2 className="text-sm font-semibold text-white">Scan phases</h2>
             </header>
@@ -308,7 +309,7 @@ export default function TargetSetupPage() {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <p className="flex items-center gap-2 text-xs font-semibold text-white">
-                      <span className="font-mono text-[10px] text-cyan-300">
+                      <span className="font-mono text-[10px] text-veritas-electric">
                         {p.id.toString().padStart(2, "0")}
                       </span>
                       {p.name}
@@ -324,8 +325,8 @@ export default function TargetSetupPage() {
               ))}
             </ol>
 
-            <div className="mt-4 rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-cyan-300">
+            <div className="mt-4 rounded-xl border border-veritas-electric/20 bg-veritas-electric/5 p-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-veritas-electric">
                 <Sparkles className="h-3.5 w-3.5" />
                 Estimated total
               </div>
@@ -344,13 +345,13 @@ export default function TargetSetupPage() {
 
             <div className="mt-4 flex items-center gap-2 rounded-lg border border-emerald-400/20 bg-emerald-400/5 px-3 py-2 text-[11px] text-emerald-300">
               <ShieldCheck className="h-3 w-3" />
-              All requests logged with audit trail
+              Browser context is destroyed after every scan
             </div>
           </div>
 
           <div className="mt-4 flex items-center justify-between gap-3 text-[11px] text-slate-500">
-            <span className="font-mono">policy: workspace.scan-default.v3</span>
-            <span className="inline-flex items-center gap-1 text-cyan-300">
+            <span className="font-mono">state: Pending → Processing → Completed/Failed</span>
+            <span className="inline-flex items-center gap-1 text-veritas-electric">
               <ScanSearch className="h-3 w-3" /> view policy
             </span>
           </div>

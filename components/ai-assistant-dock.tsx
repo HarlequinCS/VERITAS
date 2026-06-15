@@ -1,13 +1,14 @@
 "use client";
 
 import { ArrowUp, Sparkles, X } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 const SUGGESTIONS = [
-  "/explain the latest critical finding",
-  "/patch CWE-285 with minimal diff",
-  "/triage by exploitability",
-  "Summarize last 24h scans for the exec deck",
+  { label: "/explain the latest critical finding", href: "/vulnerabilities/cwe-285" },
+  { label: "/patch CWE-285 with minimal diff", href: "/vulnerabilities/cwe-285#fix" },
+  { label: "/triage by exploitability", href: "/tickets" },
+  { label: "Summarize last 24h scans for the exec deck", href: "/reports" },
 ];
 
 export function AIAssistantDock() {
@@ -19,11 +20,11 @@ export function AIAssistantDock() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="group fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-neon-mix shadow-glow-purple transition hover:scale-105"
+          className="group fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-electric-mix shadow-glow-arc transition hover:scale-105"
           aria-label="Open AI assistant"
         >
           <Sparkles className="h-5 w-5 text-veritas-bg" />
-          <span className="pointer-events-none absolute inset-0 rounded-full ring-2 ring-cyan-400/30 animate-pulse-neon" />
+          <span className="pointer-events-none absolute inset-0 rounded-full ring-2 ring-veritas-electric/30 animate-pulse-neon" />
         </button>
       )}
 
@@ -32,7 +33,7 @@ export function AIAssistantDock() {
           <div className="glass-strong overflow-hidden rounded-2xl shadow-card">
             <div className="flex items-center justify-between gap-2 border-b border-veritas-border-subtle bg-veritas-surface/50 px-4 py-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-neon-mix">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-electric-mix">
                   <Sparkles className="h-3.5 w-3.5 text-veritas-bg" />
                 </span>
                 <div>
@@ -54,7 +55,7 @@ export function AIAssistantDock() {
 
             <div className="max-h-[42vh] overflow-y-auto p-4 scrollbar-thin">
               <div className="rounded-xl border border-veritas-border-subtle bg-veritas-surface/40 p-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-purple-300">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-veritas-arc">
                   ✦ Greeting
                 </p>
                 <p className="mt-1.5 text-xs leading-relaxed text-slate-300">
@@ -69,13 +70,13 @@ export function AIAssistantDock() {
               </p>
               <ul className="flex flex-col gap-1.5">
                 {SUGGESTIONS.map((s) => (
-                  <li key={s}>
-                    <button
-                      type="button"
-                      className="w-full rounded-lg border border-veritas-border-subtle bg-veritas-surface/30 px-3 py-2 text-left text-xs text-slate-300 transition hover:border-cyan-400/30 hover:text-white"
+                  <li key={s.label}>
+                    <Link
+                      href={s.href}
+                      className="w-full rounded-lg border border-veritas-border-subtle bg-veritas-surface/30 px-3 py-2 text-left text-xs text-slate-300 transition hover:border-veritas-electric/30 hover:text-white"
                     >
-                      {s}
-                    </button>
+                      {s.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -85,15 +86,15 @@ export function AIAssistantDock() {
               <input
                 type="text"
                 placeholder="Ask about this screen..."
-                className="flex-1 rounded-lg border border-veritas-border-subtle bg-veritas-bg px-3 py-2 text-xs text-white placeholder:text-slate-500 outline-none focus:border-cyan-400/40"
+                className="flex-1 rounded-lg border border-veritas-border-subtle bg-veritas-bg px-3 py-2 text-xs text-white placeholder:text-slate-500 outline-none focus:border-veritas-electric/40"
               />
-              <button
-                type="button"
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-neon-mix text-veritas-bg shadow-glow-cyan transition hover:opacity-90"
+              <Link
+                href="/vulnerabilities/cwe-285"
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-electric-mix text-veritas-bg shadow-glow-electric transition hover:opacity-90"
                 aria-label="Send"
               >
                 <ArrowUp className="h-4 w-4" />
-              </button>
+              </Link>
             </div>
           </div>
         </div>

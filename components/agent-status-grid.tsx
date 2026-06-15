@@ -34,7 +34,7 @@ const AGENTS = [
 ] as const;
 
 function stateClass(s: string) {
-  if (s === "Active") return "text-cyan-300 bg-cyan-400/10 border-cyan-400/30";
+  if (s === "Active") return "text-veritas-electric bg-veritas-electric/10 border-veritas-electric/30";
   if (s === "Healthy")
     return "text-emerald-300 bg-emerald-400/10 border-emerald-400/30";
   return "text-amber-300 bg-amber-400/10 border-amber-400/30";
@@ -57,7 +57,7 @@ export function AgentStatusGrid() {
         {AGENTS.map((a) => (
           <li
             key={a.name}
-            className="rounded-xl border border-veritas-border-subtle bg-veritas-surface/40 p-3 transition hover:border-cyan-400/30"
+            className="rounded-xl border border-veritas-border-subtle bg-veritas-surface/40 p-3 transition hover:border-veritas-electric/30"
           >
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-semibold text-white">{a.name}</p>
@@ -68,8 +68,8 @@ export function AgentStatusGrid() {
               >
                 {a.state === "Active" && (
                   <span className="relative flex h-1 w-1">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400/60" />
-                    <span className="relative inline-flex h-1 w-1 rounded-full bg-cyan-400" />
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-veritas-electric/60" />
+                    <span className="relative inline-flex h-1 w-1 rounded-full bg-veritas-electric" />
                   </span>
                 )}
                 {a.state}
@@ -94,7 +94,7 @@ export function AgentStatusGrid() {
 
             <div className="mt-3 h-1 overflow-hidden rounded-full bg-veritas-border-subtle">
               <div
-                className="h-full rounded-full bg-neon-mix"
+                className="h-full rounded-full bg-electric-mix"
                 style={{ width: `${a.health}%` }}
               />
             </div>

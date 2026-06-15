@@ -17,7 +17,7 @@ export function PhaseTracker({ phases }: { phases: Phase[] }) {
             key={p.id}
             className={`relative flex min-w-[200px] flex-1 items-center gap-3 rounded-xl border p-3 ${
               p.status === "active"
-                ? "border-cyan-400/40 bg-cyan-400/5 shadow-glow-cyan"
+                ? "border-veritas-electric/40 bg-veritas-electric/5 shadow-glow-electric"
                 : p.status === "done"
                   ? "border-emerald-400/30 bg-emerald-400/5"
                   : "border-veritas-border-subtle bg-veritas-surface/30"
@@ -28,7 +28,7 @@ export function PhaseTracker({ phases }: { phases: Phase[] }) {
                 p.status === "done"
                   ? "bg-emerald-400/20 text-emerald-300 ring-1 ring-emerald-400/40"
                   : p.status === "active"
-                    ? "bg-cyan-400/20 text-cyan-300 ring-1 ring-cyan-400/40"
+                    ? "bg-veritas-electric/20 text-veritas-electric ring-1 ring-veritas-electric/40"
                     : "bg-veritas-surface text-slate-500 ring-1 ring-veritas-border-strong"
               }`}
             >
@@ -52,7 +52,7 @@ export function PhaseTracker({ phases }: { phases: Phase[] }) {
               {p.status === "active" && (
                 <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-veritas-border-subtle">
                   <div
-                    className="h-full rounded-full bg-neon-mix transition-all duration-700"
+                    className="h-full rounded-full bg-electric-mix transition-all duration-700"
                     style={{ width: `${p.progress ?? 0}%` }}
                   />
                 </div>

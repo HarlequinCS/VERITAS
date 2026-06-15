@@ -30,7 +30,7 @@ const LEVEL_CLASS: Record<Line["level"], string> = {
   info: "text-slate-300",
   warn: "text-amber-300",
   error: "text-rose-400",
-  ai: "text-purple-300",
+  ai: "text-veritas-arc",
   ok: "text-emerald-300",
 };
 
@@ -73,7 +73,7 @@ export function LiveTerminal() {
               onClick={() => setActive(f)}
               className={`rounded-md px-2 py-0.5 text-[10px] font-semibold transition ${
                 active === f
-                  ? "bg-cyan-400/15 text-cyan-200 ring-1 ring-cyan-400/30"
+                  ? "bg-veritas-electric/15 text-veritas-arc ring-1 ring-veritas-electric/30"
                   : "text-slate-500 hover:text-slate-200"
               }`}
             >
@@ -83,7 +83,7 @@ export function LiveTerminal() {
           <button
             type="button"
             onClick={() => setPaused((p) => !p)}
-            className="ml-2 inline-flex items-center gap-1 rounded-md border border-veritas-border-subtle bg-veritas-bg/60 px-2 py-1 text-[10px] font-semibold text-slate-300 transition hover:border-cyan-400/40 hover:text-white"
+            className="ml-2 inline-flex items-center gap-1 rounded-md border border-veritas-border-subtle bg-veritas-bg/60 px-2 py-1 text-[10px] font-semibold text-slate-300 transition hover:border-veritas-electric/40 hover:text-white"
           >
             {paused ? (
               <>
@@ -111,9 +111,9 @@ export function LiveTerminal() {
               <span className={`flex-1 ${LEVEL_CLASS[l.level]}`}>{l.text}</span>
             </div>
           ))}
-          <div className="mt-1 inline-flex items-center gap-2 text-cyan-300">
+          <div className="mt-1 inline-flex items-center gap-2 text-veritas-electric">
             <span className="font-mono">veritas@scan ▶</span>
-            <span className="inline-block h-3 w-1.5 animate-pulse bg-cyan-300" />
+            <span className="inline-block h-3 w-1.5 animate-pulse bg-veritas-electric" />
           </div>
         </div>
       </div>

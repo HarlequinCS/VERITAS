@@ -12,7 +12,7 @@ const TRACES = [
 function methodClass(m: string) {
   switch (m) {
     case "GET":
-      return "bg-cyan-400/10 text-cyan-300 ring-cyan-400/30";
+      return "bg-veritas-electric/10 text-veritas-electric ring-veritas-electric/30";
     case "POST":
       return "bg-emerald-400/10 text-emerald-300 ring-emerald-400/30";
     case "PUT":
@@ -27,7 +27,7 @@ function methodClass(m: string) {
 function statusClass(s: number) {
   if (s >= 500) return "text-rose-300";
   if (s >= 400) return "text-amber-300";
-  if (s >= 300) return "text-cyan-300";
+  if (s >= 300) return "text-veritas-electric";
   return "text-emerald-300";
 }
 
@@ -39,7 +39,7 @@ export function HttpTraceFeed() {
           <h3 className="text-xs font-semibold text-white">HTTP trace</h3>
           <p className="text-[10px] text-slate-500">last 8 requests · live</p>
         </div>
-        <span className="rounded-full bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-300 ring-1 ring-cyan-400/30">
+        <span className="rounded-full bg-veritas-electric/10 px-2 py-0.5 text-[10px] font-semibold text-veritas-electric ring-1 ring-veritas-electric/30">
           live
         </span>
       </header>

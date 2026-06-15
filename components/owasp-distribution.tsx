@@ -32,7 +32,7 @@ export function OwaspDistribution() {
           <h3 className="text-sm font-semibold text-white">OWASP Top 10 distribution</h3>
           <p className="text-[11px] text-slate-500">Across all active targets</p>
         </div>
-        <span className="rounded-full border border-veritas-border-subtle bg-veritas-surface/60 px-2 py-1 text-[10px] font-semibold text-cyan-300">
+        <span className="rounded-full border border-veritas-border-subtle bg-veritas-surface/60 px-2 py-1 text-[10px] font-semibold text-veritas-electric">
           {total} findings
         </span>
       </header>

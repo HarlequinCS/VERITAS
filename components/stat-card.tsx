@@ -23,8 +23,8 @@ export function StatCard({
   spark?: number[];
 }) {
   const accentMap = {
-    cyan: "text-cyan-300 bg-cyan-400/10 ring-cyan-400/20",
-    purple: "text-purple-300 bg-purple-400/10 ring-purple-400/20",
+    cyan: "text-veritas-electric bg-veritas-electric/10 ring-veritas-electric/20",
+    purple: "text-veritas-arc bg-veritas-arc/10 ring-veritas-arc/20",
     rose: "text-rose-300 bg-rose-400/10 ring-rose-400/20",
     amber: "text-amber-300 bg-amber-400/10 ring-amber-400/20",
   } as const;
@@ -39,7 +39,7 @@ export function StatCard({
     trend === "down" ? ArrowDownRight : trend === "up" ? ArrowUpRight : Minus;
 
   return (
-    <article className="glass group relative flex flex-col overflow-hidden rounded-2xl p-5 transition hover:border-cyan-400/30 hover:shadow-card">
+    <article className="glass group relative flex flex-col overflow-hidden rounded-2xl p-5 transition hover:border-veritas-electric/30 hover:shadow-card">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">

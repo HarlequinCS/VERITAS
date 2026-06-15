@@ -18,28 +18,28 @@ export default function DashboardPage() {
       {/* Page header */}
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-veritas-electric/80">
             Command Center
           </p>
           <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            Welcome back, Maya
+            Command centre
           </h1>
           <p className="mt-1 text-sm text-slate-400">
-            2 scans running · 14 critical findings need triage
+            2 scans processing · 14 remediation tickets need owner review
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Link
             href="/reports"
-            className="rounded-lg border border-veritas-border-subtle bg-veritas-surface/40 px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-cyan-400/40 hover:text-white"
+            className="rounded-lg border border-veritas-border-subtle bg-veritas-surface/40 px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-veritas-electric/40 hover:text-white"
           >
-            Generate report
+            Build report
           </Link>
           <Link
             href="/targets/new"
-            className="rounded-lg bg-neon-mix px-3.5 py-2 text-xs font-semibold text-veritas-bg shadow-glow-cyan transition hover:brightness-110"
+            className="rounded-lg bg-electric-mix px-3.5 py-2 text-xs font-semibold text-veritas-bg shadow-glow-electric transition hover:brightness-110"
           >
-            + New target
+            + Start scan
           </Link>
         </div>
       </div>
@@ -47,9 +47,9 @@ export default function DashboardPage() {
       {/* KPI row */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Total targets"
-          value={247}
-          sublabel="+12 this week"
+          label="Registered targets"
+          value={42}
+          sublabel="solo + team workspaces"
           icon={Target}
           accent="cyan"
           trend="down"
@@ -57,9 +57,9 @@ export default function DashboardPage() {
           spark={[12, 18, 14, 22, 19, 27, 26]}
         />
         <StatCard
-          label="Completed scans"
+          label="Completed sessions"
           value="1,832"
-          sublabel="last 30 days"
+          sublabel="Pending → Processing → Done"
           icon={ScanLine}
           accent="purple"
           trend="down"
@@ -67,7 +67,7 @@ export default function DashboardPage() {
           spark={[80, 92, 110, 96, 124, 132, 148]}
         />
         <StatCard
-          label="Critical vulns"
+          label="Critical findings"
           value={14}
           sublabel="−3 vs last week"
           icon={ShieldAlert}
@@ -77,9 +77,9 @@ export default function DashboardPage() {
           spark={[24, 21, 19, 18, 17, 15, 14]}
         />
         <StatCard
-          label="Medium vulns"
+          label="Open tickets"
           value={92}
-          sublabel="stable"
+          sublabel="dev review queue"
           icon={AlertTriangle}
           accent="amber"
           trend="flat"

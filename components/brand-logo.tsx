@@ -4,7 +4,6 @@ import Link from "next/link";
 const LOGO_SRC = "https://saifuliqbal.dev/veritaslogo.png";
 
 type BrandLogoProps = {
-  /** `nav`: marketing top bar · `hero`: auth / large placements · `header` / `compact`: in-page */
   variant?: "nav" | "hero" | "header" | "compact";
   href?: string | null;
   className?: string;
@@ -57,7 +56,7 @@ export function BrandLogo({
     return (
       <Link
         href={href}
-        className="inline-flex max-w-full items-center rounded-md outline-none ring-offset-2 ring-offset-veritas-bg transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-cyan-400/60"
+        className="inline-flex max-w-full items-center rounded-md outline-none ring-offset-2 ring-offset-veritas-bg transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-veritas-electric/60"
       >
         {image}
       </Link>
