@@ -17,6 +17,7 @@ export function HeroSection() {
   const [glitchDone, setGlitchDone] = useState(false);
   const statsRef = useRef<HTMLDivElement>(null);
   const [statsVisible, setStatsVisible] = useState(false);
+  const [threatOpen, setThreatOpen] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setGlitchDone(true), 400);
@@ -163,10 +164,14 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Threat intelligence overlay */}
-      <div className="pointer-events-none absolute left-4 bottom-20 z-20 hidden w-[360px] rounded-xl border border-veritas-border-subtle/70 bg-veritas-bg/70 p-4 shadow-card backdrop-blur-md lg:block">
-        <div className="flex items-center justify-between border-b border-veritas-border-subtle/60 pb-3">
-          <div>
+      {/* Threat intelligence overlay — collapsible */}
+      <div className="pointer-events-auto absolute left-4 bottom-20 z-20 hidden w-[360px] rounded-xl border border-veritas-border-subtle/70 bg-veritas-bg/70 shadow-card backdrop-blur-md lg:block">
+        <button
+          type="button"
+          onClick={() => setThreatOpen((o) => !o)}
+          className="flex w-full items-center justify-between gap-3 p-4 text-left"
+        >
+          <div className="min-w-0 flex-1">
             <p className="font-label text-[10px] uppercase tracking-[0.18em] text-veritas-electric">
               Global Threat Map
             </p>
@@ -181,19 +186,32 @@ export function HeroSection() {
             </span>
             Active
           </span>
-        </div>
+          <svg
+            className={`h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200 ${threatOpen ? "rotate-180" : ""}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
 
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          <ThreatMetric value="8" label="Exploit Routes" tone="text-veritas-electric" />
-          <ThreatMetric value="KEV" label="CISA Feed" tone="text-rose-300" />
-          <ThreatMetric value="AI" label="Patch Draft" tone="text-orange-300" />
-        </div>
+        {threatOpen && (
+          <div className="px-4 pb-4">
+            <div className="grid grid-cols-3 gap-3">
+              <ThreatMetric value="8" label="Exploit Routes" tone="text-veritas-electric" />
+              <ThreatMetric value="KEV" label="CISA Feed" tone="text-rose-300" />
+              <ThreatMetric value="AI" label="Patch Draft" tone="text-orange-300" />
+            </div>
 
-        <div className="mt-4 space-y-2 border-t border-veritas-border-subtle/60 pt-3">
-          <ThreatRow color="bg-rose-400" label="Red ring" value="known exploited CVE" />
-          <ThreatRow color="bg-orange-400" label="Orange arc" value="simulated attack path" />
-          <ThreatRow color="bg-veritas-electric" label="Blue node" value="your protected target" />
-        </div>
+            <div className="mt-4 space-y-2 border-t border-veritas-border-subtle/60 pt-3">
+              <ThreatRow color="bg-rose-400" label="Red ring" value="known exploited CVE" />
+              <ThreatRow color="bg-orange-400" label="Orange arc" value="simulated attack path" />
+              <ThreatRow color="bg-veritas-electric" label="Blue node" value="your protected target" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Ticker bar */}
