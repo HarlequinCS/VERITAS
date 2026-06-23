@@ -1,8 +1,7 @@
 "use client";
 
-import { useActionState, useState, useTransition, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { useActionState, useEffect, useState, useTransition, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signInUser, signInWithProvider } from "@/app/actions/auth";
 import {
   ArrowRight,
@@ -54,12 +53,16 @@ const GitHubIcon = (
 )
 
 const ICON_SRC = "https://saifuliqbal.dev/veritasicon.png";
-const initialState = { error: null };
+const initialState = { error: '' as string, success: false as boolean };
 
 export default function AuthPage() {
   const [state, formAction, isPending] = useActionState(signInUser, initialState);
   const [showPassword, setShowPassword] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState("");
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state?.success) router.push("/dashboard");
+  }, [state?.success, router]);
 
   // Separate transitions for each OAuth provider — independent loading states
   const [googlePending, startGoogle] = useTransition()
@@ -157,12 +160,6 @@ export default function AuthPage() {
           </div>
 
           <form action={formAction} className="space-y-4" noValidate>
-            {/* Hidden Turnstile token */}
-            <input
-              type="hidden"
-              name="cf-turnstile-response"
-              value={turnstileToken}
-            />
 
             {/* Email */}
             <label className="block">
@@ -220,19 +217,8 @@ export default function AuthPage() {
               </div>
             </label>
 
-            {/* Cloudflare Turnstile */}
-            <div className="pt-1">
-              <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                onSuccess={(token) => setTurnstileToken(token)}
-                onExpire={() => setTurnstileToken("")}
-                onError={() => setTurnstileToken("")}
-                options={{ theme: "dark", size: "flexible" }}
-              />
-            </div>
-
             {/* Error message */}
-            {state?.error && (
+            {typeof state?.error === 'string' && state.error.length > 0 && (
               <div
                 role="alert"
                 className="flex items-start gap-2.5 rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-300"
@@ -246,7 +232,7 @@ export default function AuthPage() {
             <button
               id="auth-submit"
               type="submit"
-              disabled={isPending || !turnstileToken}
+              disabled={isPending}
               className="group mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-electric-mix font-semibold text-veritas-bg shadow-glow-electric transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPending ? (

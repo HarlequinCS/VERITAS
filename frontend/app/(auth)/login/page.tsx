@@ -1,13 +1,12 @@
 'use client'
 
-import { useActionState, useState, useTransition, Suspense } from 'react'
+import { useActionState, useTransition, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Turnstile } from '@marsidev/react-turnstile'
 import Link from 'next/link'
 import { signInUser, signInWithProvider } from '@/app/actions/auth'
 
 // ---------------------------------------------------------------------------
-// Initialstate
+// Initial state
 // ---------------------------------------------------------------------------
 const initialState = { error: null }
 
@@ -52,7 +51,6 @@ const GitHubIcon = (
 // ---------------------------------------------------------------------------
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(signInUser, initialState)
-  const [turnstileToken, setTurnstileToken] = useState('')
 
   // Separate transitions for each OAuth provider — independent loading states
   const [googlePending, startGoogle] = useTransition()
@@ -126,7 +124,6 @@ export default function LoginPage() {
 
         {/* ── Email / Password form ────────────────────────────── */}
         <form action={formAction} className="auth-form" noValidate>
-          <input type="hidden" name="cf-turnstile-response" value={turnstileToken} />
 
           {/* Email */}
           <div className="auth-field">
@@ -167,17 +164,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Cloudflare Turnstile */}
-          <div className="auth-turnstile">
-            <Turnstile
-              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-              onSuccess={(token) => setTurnstileToken(token)}
-              onExpire={() => setTurnstileToken('')}
-              onError={() => setTurnstileToken('')}
-              options={{ theme: 'dark', size: 'flexible' }}
-            />
-          </div>
-
           {/* Error */}
           {state?.error && (
             <div className="auth-error" role="alert">
@@ -190,7 +176,7 @@ export default function LoginPage() {
           <button
             id="login-submit"
             type="submit"
-            disabled={isPending || !turnstileToken}
+            disabled={isPending}
             className="auth-btn"
           >
             {isPending && <span className="auth-btn__spinner" aria-hidden={true} />}
@@ -317,8 +303,6 @@ const authStyles = `
     border-color: #6366f1; background: rgba(99,102,241,.08);
     box-shadow: 0 0 0 3px rgba(99,102,241,.15);
   }
-
-  .auth-turnstile { width: 100%; }
 
   /* Error */
   .auth-error {

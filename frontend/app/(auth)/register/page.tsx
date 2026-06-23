@@ -1,7 +1,6 @@
 'use client'
 
-import { useActionState, useState } from 'react'
-import { Turnstile } from '@marsidev/react-turnstile'
+import { useActionState } from 'react'
 import Link from 'next/link'
 import { signUpUser } from '@/app/actions/auth'
 
@@ -9,7 +8,6 @@ const initialState = { error: null }
 
 export default function RegisterPage() {
   const [state, formAction, isPending] = useActionState(signUpUser, initialState)
-  const [turnstileToken, setTurnstileToken] = useState('')
 
   return (
     <main className="auth-page">
@@ -32,8 +30,6 @@ export default function RegisterPage() {
 
         {/* Form */}
         <form action={formAction} className="auth-form" noValidate>
-          {/* Hidden Turnstile token */}
-          <input type="hidden" name="cf-turnstile-response" value={turnstileToken} />
 
           {/* Email */}
           <div className="auth-field">
@@ -87,17 +83,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Cloudflare Turnstile */}
-          <div className="auth-turnstile">
-            <Turnstile
-              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-              onSuccess={(token) => setTurnstileToken(token)}
-              onExpire={() => setTurnstileToken('')}
-              onError={() => setTurnstileToken('')}
-              options={{ theme: 'dark', size: 'flexible' }}
-            />
-          </div>
-
           {/* Error */}
           {state?.error && (
             <div className="auth-error" role="alert">
@@ -109,7 +94,7 @@ export default function RegisterPage() {
           {/* Submit */}
           <button
             type="submit"
-            disabled={isPending || !turnstileToken}
+            disabled={isPending}
             className="auth-btn"
           >
             {isPending ? (
@@ -256,9 +241,6 @@ const authStyles = `
     background: rgba(99,102,241,.08);
     box-shadow: 0 0 0 3px rgba(99,102,241,.15);
   }
-
-  /* Turnstile */
-  .auth-turnstile { width: 100%; }
 
   /* Error */
   .auth-error {

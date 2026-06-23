@@ -3,6 +3,7 @@ import { AgentStatusGrid } from "@/components/agent-status-grid";
 import { LiveActivityRail } from "@/components/live-activity-rail";
 import { OwaspDistribution } from "@/components/owasp-distribution";
 import type { OwaspItem } from "@/components/owasp-distribution";
+import { ProfileSetupForm } from "@/components/profile-setup-form";
 import { ScanSessionTable } from "@/components/scan-session-table";
 import type { ScanSession } from "@/components/scan-session-table";
 import { StatCard } from "@/components/stat-card";
@@ -31,7 +32,10 @@ export default async function DashboardPage() {
   const supabase = await createClient();
 
   let username = "Analyst";
+  let userEmail = "";
+  let userRole = "Analyst";
   let authError: string | null = null;
+  let needsProfileSetup = false;
 
   try {
     const {
@@ -42,12 +46,17 @@ export default async function DashboardPage() {
     if (userErr || !user) {
       authError = "Unauthenticated. Please sign in.";
     } else {
+      userEmail = user.email ?? "";
       const { data: profile } = await supabase
         .from("users")
-        .select("username")
+        .select("username, role")
         .eq("user_id", user.id)
         .single();
       if (profile?.username) username = profile.username;
+      if (profile?.role) userRole = profile.role;
+
+      // Show profile form if user hasn't completed onboarding
+      needsProfileSetup = user.user_metadata?.onboarded !== true;
     }
   } catch {
     authError = "Unable to verify session.";
@@ -174,7 +183,9 @@ export default async function DashboardPage() {
     // leave owaspData empty → component falls back to default
   }
 
-  return (
+  return needsProfileSetup ? (
+    <ProfileSetupForm currentUsername={username} currentRole={userRole} email={userEmail} />
+  ) : (
     <main className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       {/* Global error banner */}
       {(authError || scanError) && (

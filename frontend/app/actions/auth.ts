@@ -4,41 +4,15 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 
 // ---------------------------------------------------------------------------
-// Cloudflare Turnstile server-side verification
-// ---------------------------------------------------------------------------
-export async function verifyTurnstile(token: string): Promise<boolean> {
-  const secret = process.env.TURNSTILE_SECRET_KEY
-  if (!secret) throw new Error('TURNSTILE_SECRET_KEY is not configured.')
-  if (!token) return false
-
-  const res = await fetch(
-    'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, response: token }),
-    }
-  )
-
-  if (!res.ok) return false
-  const data = await res.json()
-  return data.success === true
-}
-
-// ---------------------------------------------------------------------------
 // Sign Up (Email / Password)
 // ---------------------------------------------------------------------------
 export async function signUpUser(
   _prevState: { error: string | null },
   formData: FormData
 ): Promise<{ error: string | null }> {
-  const token    = formData.get('cf-turnstile-response') as string
   const email    = (formData.get('email') as string)?.trim()
   const password = formData.get('password') as string
   const username = (formData.get('username') as string)?.trim()
-
-  const ok = await verifyTurnstile(token)
-  if (!ok) return { error: 'Bot verification failed. Please try again.' }
 
   if (!email || !password || !username)
     return { error: 'All fields are required.' }
@@ -64,12 +38,8 @@ export async function signInUser(
   _prevState: { error: string | null },
   formData: FormData
 ): Promise<{ error: string | null }> {
-  const token    = formData.get('cf-turnstile-response') as string
   const email    = (formData.get('email') as string)?.trim()
   const password = formData.get('password') as string
-
-  const ok = await verifyTurnstile(token)
-  if (!ok) return { error: 'Bot verification failed. Please try again.' }
 
   if (!email || !password)
     return { error: 'Email and password are required.' }

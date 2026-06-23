@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse, type NextRequest } from 'next/server'
+import { sendWelcomeEmail } from '@/lib/welcome-email'
 
 /**
  * OAuth callback handler.
@@ -68,6 +69,20 @@ export async function GET(request: NextRequest) {
         console.error('[auth/callback] users insert fallback error:', insertErr.message)
       }
     }
+
+    // Send welcome email to OAuth users (non-blocking)
+    const provider = user.app_metadata?.provider as string | undefined
+    const method = provider === 'github' ? 'GitHub' as const : 'Google' as const
+    const uname =
+      (user.user_metadata?.username as string) ??
+      user.email?.split('@')[0] ??
+      'there'
+
+    sendWelcomeEmail({
+      email: user.email!,
+      username: uname,
+      method,
+    }).catch((e) => console.error('[auth/callback] welcome email error:', e))
   }
 
   // Session set — redirect to dashboard

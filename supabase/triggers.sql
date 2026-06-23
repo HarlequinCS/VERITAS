@@ -225,6 +225,21 @@ CREATE TABLE IF NOT EXISTS public.users (
 -- 2. Enable RLS on the table (recommended)
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
+-- 2a. RLS policies so a signed-in user can read/update their own row.
+--     Without these, RLS denies all access by default: the dashboard
+--     SELECT returns nothing and the profile UPDATE silently affects 0 rows.
+DROP POLICY IF EXISTS users_select_own ON public.users;
+CREATE POLICY users_select_own ON public.users
+  FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS users_update_own ON public.users;
+CREATE POLICY users_update_own ON public.users
+  FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS users_insert_own ON public.users;
+CREATE POLICY users_insert_own ON public.users
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
 -- 3. Create the trigger function
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER

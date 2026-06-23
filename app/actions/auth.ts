@@ -3,87 +3,101 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 
-// ---------------------------------------------------------------------------
-// Cloudflare Turnstile server-side verification
-// ---------------------------------------------------------------------------
-export async function verifyTurnstile(token: string): Promise<boolean> {
-  const secret = process.env.TURNSTILE_SECRET_KEY
-  if (!secret) throw new Error('TURNSTILE_SECRET_KEY is not configured.')
-  if (!token) return false
+type AuthResult = { error: string; success?: boolean }
 
-  const res = await fetch(
-    'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, response: token }),
-    }
-  )
+// Helper: extract a guaranteed string message from any thrown value.
+// IMPORTANT: re-throw Next.js special signals (redirect, notFound, etc.)
+// so they propagate correctly and don't get swallowed as "{}".
+function isNextInternalSignal(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false
+  const digest = (err as Record<string, unknown>).digest
+  if (typeof digest === 'string') {
+    return digest.startsWith('NEXT_REDIRECT') || digest.startsWith('NEXT_NOT_FOUND')
+  }
+  return false
+}
 
-  if (!res.ok) return false
-  const data = await res.json()
-  return data.success === true
+function toMessage(err: unknown): string {
+  if (isNextInternalSignal(err)) throw err          // let Next.js handle it
+  if (typeof err === 'string' && err) return err
+  if (err instanceof Error && err.message) return err.message
+  return 'Something went wrong. Please try again.'
 }
 
 // ---------------------------------------------------------------------------
-// Sign In
+// Sign In — returns result, caller redirects
 // ---------------------------------------------------------------------------
 export async function signInUser(
-  _prevState: { error: string | null },
+  _prevState: AuthResult,
   formData: FormData
-): Promise<{ error: string | null }> {
-  const token    = formData.get('cf-turnstile-response') as string
-  const email    = (formData.get('email') as string)?.trim()
-  const password = formData.get('password') as string
+): Promise<AuthResult> {
+  try {
+    const email    = (formData.get('email') as string)?.trim()
+    const password = formData.get('password') as string
 
-  // 1. Turnstile
-  const ok = await verifyTurnstile(token)
-  if (!ok) return { error: 'Bot verification failed. Please try again.' }
+    if (!email || !password)
+      return { error: 'Email and password are required.' }
 
-  // 2. Basic validation
-  if (!email || !password)
-    return { error: 'Email and password are required.' }
+    const supabase = await createClient()
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    
+    if (error) {
+      console.error('[signInUser] Supabase error object:', error)
+      const msg = error.message === '{}' || !error.message 
+        ? 'Could not connect to the authentication server. Please check your network or try again later.' 
+        : error.message
+      return { error: msg }
+    }
 
-  // 3. Supabase sign-in
-  const supabase = await createClient()
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
-  if (error) return { error: error.message }
-
-  redirect('/dashboard')
+    return { error: '', success: true }
+  } catch (err) {
+    if (isNextInternalSignal(err)) throw err
+    console.error('[signInUser]', err)
+    return { error: toMessage(err) }
+  }
 }
 
 // ---------------------------------------------------------------------------
-// Sign Up
+// Sign Up — returns result, caller redirects
 // ---------------------------------------------------------------------------
 export async function signUpUser(
-  _prevState: { error: string | null },
+  _prevState: AuthResult,
   formData: FormData
-): Promise<{ error: string | null }> {
-  const token    = formData.get('cf-turnstile-response') as string
-  const email    = (formData.get('email') as string)?.trim()
-  const password = formData.get('password') as string
-  const username = (formData.get('username') as string)?.trim()
+): Promise<AuthResult> {
+  try {
+    const email    = (formData.get('email') as string)?.trim()
+    const password = formData.get('password') as string
+    const username = (formData.get('username') as string)?.trim()
 
-  // 1. Turnstile
-  const ok = await verifyTurnstile(token)
-  if (!ok) return { error: 'Bot verification failed. Please try again.' }
+    if (!email || !password || !username)
+      return { error: 'All fields are required.' }
+    if (password.length < 8)
+      return { error: 'Password must be at least 8 characters.' }
 
-  // 2. Basic validation
-  if (!email || !password || !username)
-    return { error: 'All fields are required.' }
-  if (password.length < 8)
-    return { error: 'Password must be at least 8 characters.' }
+    const supabase = await createClient()
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { username },
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/auth/confirmed`,
+      },
+    })
 
-  // 3. Supabase sign-up
-  const supabase = await createClient()
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { username } },
-  })
-  if (error) return { error: error.message }
+    if (error) {
+      console.error('[signUpUser] Supabase error object:', error)
+      const msg = error.message === '{}' || !error.message 
+        ? 'Could not connect to the authentication server. Please check your network or try again later.' 
+        : error.message
+      return { error: msg }
+    }
 
-  redirect('/auth/verify-email')
+    return { error: '', success: true }
+  } catch (err) {
+    if (isNextInternalSignal(err)) throw err
+    console.error('[signUpUser]', err)
+    return { error: toMessage(err) }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -106,7 +120,6 @@ export async function signInWithProvider(
     )
   }
 
-  // Send browser to the OAuth provider (Google or GitHub)
   redirect(data.url)
 }
 
