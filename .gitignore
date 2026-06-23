@@ -7,7 +7,7 @@ __pycache__/
 payloads/*.json
 
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
