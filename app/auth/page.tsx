@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition, Suspense } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signInUser, signInWithProvider } from "@/app/actions/auth";
+import { Turnstile } from "@marsidev/react-turnstile";
 import {
   ArrowRight,
   Eye,
@@ -58,6 +59,8 @@ const initialState = { error: '' as string, success: false as boolean };
 export default function AuthPage() {
   const [state, formAction, isPending] = useActionState(signInUser, initialState);
   const [showPassword, setShowPassword] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -227,6 +230,14 @@ export default function AuthPage() {
                 {state.error}
               </div>
             )}
+
+            {/* Turnstile */}
+            <input ref={turnstileRef} type="hidden" name="cf-turnstile-token" value={turnstileToken} />
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+              onSuccess={(token) => setTurnstileToken(token)}
+              options={{ theme: "dark" }}
+            />
 
             {/* Submit */}
             <button

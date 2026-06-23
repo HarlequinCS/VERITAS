@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signUpUser } from "@/app/actions/auth";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { ArrowRight, Lock, Mail, ShieldCheck, User } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import Image from "next/image";
@@ -14,17 +15,13 @@ const initialState = { error: '' as string, success: false as boolean }
 export default function RegisterPage() {
   const [state, formAction, isPending] = useActionState(signUpUser, initialState);
   const [showPassword, setShowPassword] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
     if (state?.success) router.push("/auth/verify-email");
   }, [state?.success, router]);
-
-  // ── DEBUG: remove after fixing ──────────────────────────────
-  useEffect(() => {
-    console.log('[register state]', JSON.stringify(state))
-  }, [state])
-  // ────────────────────────────────────────────────────────────
 
 
   return (
@@ -148,6 +145,14 @@ export default function RegisterPage() {
                 {state.error}
               </div>
             )}
+
+            {/* Turnstile */}
+            <input ref={turnstileRef} type="hidden" name="cf-turnstile-token" value={turnstileToken} />
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+              onSuccess={(token) => setTurnstileToken(token)}
+              options={{ theme: "dark" }}
+            />
 
             {/* Submit */}
             <button
