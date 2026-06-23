@@ -1,7 +1,10 @@
+import { createClient } from "@/utils/supabase/server";
 import { AgentStatusGrid } from "@/components/agent-status-grid";
 import { LiveActivityRail } from "@/components/live-activity-rail";
 import { OwaspDistribution } from "@/components/owasp-distribution";
+import type { OwaspItem } from "@/components/owasp-distribution";
 import { ScanSessionTable } from "@/components/scan-session-table";
+import type { ScanSession } from "@/components/scan-session-table";
 import { StatCard } from "@/components/stat-card";
 import { ThreatHeatmap } from "@/components/threat-heatmap";
 import {
@@ -12,9 +15,178 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-export default function DashboardPage() {
+function fmtRelative(d: Date): string {
+  const now = Date.now();
+  const then = d.getTime();
+  const diffSec = Math.floor((now - then) / 1000);
+  if (diffSec < 60) return "just now";
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)} min ago`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+  if (diffSec < 172800) return "Yesterday";
+  if (diffSec < 604800) return `${Math.floor(diffSec / 86400)} days ago`;
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+export default async function DashboardPage() {
+  const supabase = await createClient();
+
+  let username = "Analyst";
+  let authError: string | null = null;
+
+  try {
+    const {
+      data: { user },
+      error: userErr,
+    } = await supabase.auth.getUser();
+
+    if (userErr || !user) {
+      authError = "Unauthenticated. Please sign in.";
+    } else {
+      const { data: profile } = await supabase
+        .from("users")
+        .select("username")
+        .eq("user_id", user.id)
+        .single();
+      if (profile?.username) username = profile.username;
+    }
+  } catch {
+    authError = "Unable to verify session.";
+  }
+
+  let sessions: ScanSession[] = [];
+  let scanError: string | null = null;
+
+  try {
+    const { data: rows, error: scansErr } = await supabase
+      .from("scan_sessions")
+      .select(
+        "session_id, scan_status, scan_mode, start_time, end_time, created_at, target_applications(target_url)"
+      )
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (scansErr) {
+      scanError = scansErr.message;
+    } else if (rows && rows.length > 0) {
+      const sessionIds = rows.map((r) => r.session_id);
+
+      // Fetch severity breakdown per session
+      const { data: vulns } = await supabase
+        .from("detected_vulnerabilities")
+        .select("session_id, severity_level")
+        .in("session_id", sessionIds)
+        .eq("is_false_positive", false);
+
+      const findingsMap = new Map<
+        string,
+        { c: number; h: number; m: number; l: number }
+      >();
+      vulns?.forEach((v) => {
+        const curr = findingsMap.get(v.session_id) ?? { c: 0, h: 0, m: 0, l: 0 };
+        if (v.severity_level === "Critical") curr.c++;
+        else if (v.severity_level === "High") curr.h++;
+        else if (v.severity_level === "Medium") curr.m++;
+        else if (v.severity_level === "Low") curr.l++;
+        findingsMap.set(v.session_id, curr);
+      });
+
+      sessions = rows.map((r) => {
+        const start = r.start_time ? new Date(r.start_time) : null;
+        const end = r.end_time ? new Date(r.end_time) : null;
+        let duration = "—";
+        if (start && end) {
+          const sec = Math.floor((end.getTime() - start.getTime()) / 1000);
+          if (sec < 60) duration = `${sec}s`;
+          else if (sec < 3600)
+            duration = `${Math.floor(sec / 60)}m ${sec % 60}s`;
+          else
+            duration = `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`;
+        } else if (start) {
+          const sec = Math.floor((Date.now() - start.getTime()) / 1000);
+          if (sec < 60) duration = `${sec}s`;
+          else if (sec < 3600)
+            duration = `${Math.floor(sec / 60)}m ${sec % 60}s`;
+          else
+            duration = `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`;
+        }
+
+        const taArr = (r.target_applications ?? []) as { target_url: string }[];
+        const ta = taArr[0];
+        return {
+          id: (r.session_id as string).slice(0, 8),
+          target: ta?.target_url ?? "Unknown",
+          mode: (r.scan_mode ?? "Black Box") as "Black Box" | "White Box",
+          started: fmtRelative(new Date(r.created_at)),
+          duration,
+          findings: findingsMap.get(r.session_id as string) ?? {
+            c: 0,
+            h: 0,
+            m: 0,
+            l: 0,
+          },
+          status: r.scan_status as "Running" | "Completed" | "Failed",
+        };
+      });
+    }
+  } catch {
+    scanError = "Unable to load scan history.";
+  }
+
+  const totalScans = sessions.length;
+  const completedScans = sessions.filter((s) => s.status === "Completed").length;
+  const totalCritical = sessions.reduce((sum, s) => sum + s.findings.c, 0);
+  const openTickets = sessions.filter(
+    (s) => s.status === "Running" || s.status === "Failed"
+  ).length;
+
+  // Fetch OWASP category distribution
+  let owaspData: OwaspItem[] = [];
+  try {
+    const { data: catRows } = await supabase
+      .from("detected_vulnerabilities")
+      .select("owasp_category, severity_level")
+      .eq("is_false_positive", false);
+
+    if (catRows) {
+      const catMap = new Map<string, { count: number; severity: string }>();
+      catRows.forEach((r) => {
+        const cat = r.owasp_category ?? "Unknown";
+        const existing = catMap.get(cat);
+        if (existing) {
+          existing.count++;
+          // Upgrade severity if higher
+          const sevRank: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
+          if ((sevRank[r.severity_level?.toLowerCase() ?? "low"] ?? 0) > (sevRank[existing.severity] ?? 0)) {
+            existing.severity = r.severity_level?.toLowerCase() ?? "low";
+          }
+        } else {
+          catMap.set(cat, { count: 1, severity: r.severity_level?.toLowerCase() ?? "low" });
+        }
+      });
+      owaspData = Array.from(catMap.entries()).map(([label, v], i) => ({
+        id: `A${(i + 1).toString().padStart(2, "0")}`,
+        label,
+        count: v.count,
+        severity: v.severity as "critical" | "high" | "medium" | "low",
+      }));
+    }
+  } catch {
+    // leave owaspData empty → component falls back to default
+  }
+
   return (
     <main className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      {/* Global error banner */}
+      {(authError || scanError) && (
+        <div
+          role="alert"
+          className="mb-6 flex items-start gap-2.5 rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-300"
+        >
+          <span className="mt-0.5 shrink-0 text-rose-400">⚠</span>
+          {authError ?? scanError}
+        </div>
+      )}
+
       {/* Page header */}
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -22,10 +194,12 @@ export default function DashboardPage() {
             Command Center
           </p>
           <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            Command centre
+            Welcome back, {username}
           </h1>
           <p className="mt-1 text-sm text-slate-400">
-            2 scans processing · 14 remediation tickets need owner review
+            {totalScans > 0
+              ? `${sessions.filter((s) => s.status === "Running").length} scan${sessions.filter((s) => s.status === "Running").length === 1 ? "" : "s"} processing · ${openTickets} open ticket${openTickets === 1 ? "" : "s"}`
+              : "No active scans. Start your first vulnerability assessment."}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -48,50 +222,50 @@ export default function DashboardPage() {
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Registered targets"
-          value={42}
+          value={totalScans}
           sublabel="solo + team workspaces"
           icon={Target}
           accent="cyan"
-          trend="down"
-          trendValue="+5.4%"
-          spark={[12, 18, 14, 22, 19, 27, 26]}
+          trend="flat"
+          trendValue="0.0%"
+          spark={[totalScans]}
         />
         <StatCard
           label="Completed sessions"
-          value="1,832"
+          value={completedScans}
           sublabel="Pending → Processing → Done"
           icon={ScanLine}
           accent="purple"
-          trend="down"
-          trendValue="+6.2%"
-          spark={[80, 92, 110, 96, 124, 132, 148]}
+          trend="flat"
+          trendValue="0.0%"
+          spark={[completedScans]}
         />
         <StatCard
           label="Critical findings"
-          value={14}
-          sublabel="−3 vs last week"
+          value={totalCritical}
+          sublabel="Across all scans"
           icon={ShieldAlert}
           accent="rose"
-          trend="down"
-          trendValue="−17.6%"
-          spark={[24, 21, 19, 18, 17, 15, 14]}
+          trend="flat"
+          trendValue="0.0%"
+          spark={[totalCritical]}
         />
         <StatCard
           label="Open tickets"
-          value={92}
+          value={openTickets}
           sublabel="dev review queue"
           icon={AlertTriangle}
           accent="amber"
           trend="flat"
           trendValue="0.0%"
-          spark={[88, 90, 91, 89, 92, 93, 92]}
+          spark={[openTickets]}
         />
       </div>
 
       {/* Charts row */}
       <div className="mt-6 grid gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
-          <OwaspDistribution />
+          <OwaspDistribution data={owaspData} />
         </div>
         <ThreatHeatmap />
       </div>
@@ -99,7 +273,7 @@ export default function DashboardPage() {
       {/* Table + side rail */}
       <div className="mt-6 grid gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
-          <ScanSessionTable />
+          <ScanSessionTable sessions={sessions} />
         </div>
         <LiveActivityRail />
       </div>

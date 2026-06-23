@@ -24,9 +24,48 @@ const AGENTS = [
   { name: "Validator", state: "queued", tone: "slate" },
 ] as const;
 
-export default function LiveScanPage() {
+import { createClient } from "@/utils/supabase/server";
+
+export default async function LiveScanPage() {
+  const supabase = await createClient();
+
+  let targetUrl = "—";
+  let sessionId = "—";
+  let scanStatus = "No active session";
+  let scanError: string | null = null;
+
+  try {
+    const { data: session, error } = await supabase
+      .from("scan_sessions")
+      .select("session_id, scan_status, target_applications(target_url)")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      scanError = error.message;
+    } else if (session) {
+      sessionId = (session.session_id as string).slice(0, 8);
+      scanStatus = session.scan_status ?? "Unknown";
+      const taArr = (session.target_applications ?? []) as { target_url: string }[];
+      targetUrl = taArr[0]?.target_url ?? "Unknown";
+    }
+  } catch {
+    scanError = "Unable to load scan session.";
+  }
   return (
     <main className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      {/* Error banner */}
+      {scanError && (
+        <div
+          role="alert"
+          className="mb-5 flex items-start gap-2.5 rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-300"
+        >
+          <span className="mt-0.5 shrink-0 text-rose-400">⚠</span>
+          {scanError}
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -35,11 +74,11 @@ export default function LiveScanPage() {
           </p>
           <h1 className="mt-1.5 flex items-center gap-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
             <Crosshair className="h-6 w-6 text-veritas-electric" />
-            <span className="font-mono">app.acme.io</span>
+            <span className="font-mono">{targetUrl}</span>
           </h1>
           <p className="mt-1 text-sm text-slate-400">
             Session{" "}
-            <span className="font-mono text-veritas-electric">sess-2098</span> · status Processing · ephemeral browser context active
+            <span className="font-mono text-veritas-electric">{sessionId}</span> · status {scanStatus}
           </p>
         </div>
 

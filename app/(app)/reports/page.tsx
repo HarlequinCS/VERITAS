@@ -15,7 +15,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 
 const ICON_SRC = "https://saifuliqbal.dev/veritasicon.png";
 
@@ -44,11 +45,42 @@ const FINDINGS = [
   { sev: "low" as const, label: "Logging Failures", count: 4 },
 ];
 
+type FindingItem = { sev: "critical" | "high" | "medium" | "low"; label: string; count: number };
+
 export default function ReportStudioPage() {
   const [audience, setAudience] = useState<Audience>("Executive");
   const [enabled, setEnabled] = useState<Record<string, boolean>>(
     Object.fromEntries(SECTIONS.map((s) => [s.id, s.default])),
   );
+  const [findings, setFindings] = useState<FindingItem[]>(FINDINGS);
+  const [findingsLoading, setFindingsLoading] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase
+      .from("detected_vulnerabilities")
+      .select("severity_level")
+      .eq("is_false_positive", false)
+      .then(({ data, error }) => {
+        if (error || !data) {
+          setFindings(FINDINGS);
+          setFindingsLoading(false);
+          return;
+        }
+        const counts: Record<string, number> = {};
+        data.forEach((v) => {
+          const sev = (v.severity_level ?? "low").toLowerCase();
+          counts[sev] = (counts[sev] || 0) + 1;
+        });
+        setFindings([
+          { sev: "critical", label: "Critical Vulnerabilities", count: counts["critical"] || 0 },
+          { sev: "high", label: "High Severity Findings", count: counts["high"] || 0 },
+          { sev: "medium", label: "Medium Severity Issues", count: counts["medium"] || 0 },
+          { sev: "low", label: "Low / Informational", count: counts["low"] || 0 + (counts["info"] || 0) },
+        ]);
+        setFindingsLoading(false);
+      });
+  }, []);
 
   function toggle(id: string) {
     setEnabled((s) => ({ ...s, [id]: !s[id] }));
@@ -279,19 +311,16 @@ export default function ReportStudioPage() {
                     Executive summary
                   </p>
                   <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    <KpiTile label="Findings" value="23" delta="−4" />
+                    <KpiTile label="Findings" value={String(findings.reduce((s, f) => s + f.count, 0))} delta="—" />
                     <KpiTile label="Risk index" value="6.2" delta="−0.8" tone="amber" />
                     <KpiTile label="Mean TTR" value="34h" delta="+6h" tone="rose" />
                     <KpiTile label="Coverage" value="92%" delta="+4%" tone="emerald" />
                   </div>
                   <p className="mt-4 text-xs leading-relaxed text-slate-300">
-                    The Q3 assessment surfaced{" "}
-                    <span className="text-rose-300">3 critical</span> and{" "}
-                    <span className="text-amber-300">5 high</span> findings,
-                    with a primary concentration in access-control gaps in
-                    administrative routes. Patch drafts are attached for the
-                    top 8 findings; engineering review is recommended within
-                    48 hours.
+                    Assessment surfaced{" "}
+                    <span className="text-rose-300">{findings.find((f) => f.sev === "critical")?.count ?? 0} critical</span> and{" "}
+                    <span className="text-amber-300">{findings.find((f) => f.sev === "high")?.count ?? 0} high</span> findings.
+                    Engineering review is recommended within 48 hours.
                   </p>
                 </section>
 
@@ -300,20 +329,24 @@ export default function ReportStudioPage() {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                     Findings by severity
                   </p>
-                  <ul className="mt-3 space-y-2">
-                    {FINDINGS.map((f, i) => (
-                      <li
-                        key={i}
-                        className="flex items-center gap-3 rounded-lg border border-veritas-border-subtle bg-veritas-surface/30 px-3 py-2"
-                      >
-                        <SeverityBadge severity={f.sev} size="sm" />
-                        <p className="flex-1 text-xs text-slate-200">{f.label}</p>
-                        <span className="font-mono text-xs text-white">
-                          ×{f.count}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  {findingsLoading ? (
+                    <p className="mt-3 text-xs text-slate-500">Loading findings…</p>
+                  ) : (
+                    <ul className="mt-3 space-y-2">
+                      {findings.map((f, i) => (
+                        <li
+                          key={i}
+                          className="flex items-center gap-3 rounded-lg border border-veritas-border-subtle bg-veritas-surface/30 px-3 py-2"
+                        >
+                          <SeverityBadge severity={f.sev} size="sm" />
+                          <p className="flex-1 text-xs text-slate-200">{f.label}</p>
+                          <span className="font-mono text-xs text-white">
+                            ×{f.count}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </section>
 
                 {/* Compliance */}

@@ -4,11 +4,13 @@ import {
   Bell,
   ChevronRight,
   Command,
+  LogOut,
   Menu,
   Search,
   ShieldCheck,
   X,
 } from "lucide-react";
+import { signOutUser } from "@/app/actions/auth";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,7 +30,13 @@ function deriveCrumbs(pathname: string | null) {
   return ["Workspace", ...titled];
 }
 
-export function CommandBar() {
+export function CommandBar({
+  username = "User",
+  role = "Workspace",
+}: {
+  username?: string;
+  role?: string;
+}) {
   const pathname = usePathname();
   const crumbs = deriveCrumbs(pathname);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -126,13 +134,24 @@ export function CommandBar() {
             </span>
             <span className="hidden text-left md:block">
               <span className="block text-xs font-semibold leading-tight text-white">
-                Maya Khoury
+                {username}
               </span>
               <span className="block text-[10px] leading-tight text-slate-500">
-                Lead · Acme
+                {role}
               </span>
             </span>
           </Link>
+
+          <form action={signOutUser} className="hidden sm:block">
+            <button
+              type="submit"
+              className="flex h-9 items-center gap-1.5 rounded-lg border border-veritas-border-subtle px-2.5 text-xs text-slate-300 transition hover:border-rose-400/40 hover:bg-rose-500/10 hover:text-rose-200"
+              title="Log out"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden md:inline">Log out</span>
+            </button>
+          </form>
         </div>
       </header>
 

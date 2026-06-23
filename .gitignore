@@ -1,3 +1,11 @@
+# python
+venv/
+__pycache__/
+*.pyc
+
+# payloads (injected separately, not tracked in git)
+payloads/*.json
+
 # dependencies
 /node_modules
 /.pnp

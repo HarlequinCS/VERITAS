@@ -1,24 +1,32 @@
-const OWASP_DATA = [
-  { id: "A01", label: "Broken Access Control", count: 14, severity: "critical" },
-  { id: "A02", label: "Cryptographic Failures", count: 6, severity: "high" },
-  { id: "A03", label: "Injection", count: 9, severity: "high" },
-  { id: "A04", label: "Insecure Design", count: 4, severity: "medium" },
-  { id: "A05", label: "Security Misconfiguration", count: 11, severity: "medium" },
-  { id: "A06", label: "Vulnerable Components", count: 7, severity: "medium" },
-  { id: "A07", label: "Authentication Failures", count: 5, severity: "high" },
-  { id: "A08", label: "Software & Data Integrity", count: 2, severity: "low" },
-  { id: "A09", label: "Logging Failures", count: 3, severity: "low" },
-  { id: "A10", label: "Server-Side Request Forgery", count: 1, severity: "low" },
-] as const;
+const DEFAULT_DATA = [
+  { id: "A01", label: "Broken Access Control", count: 14, severity: "critical" as const },
+  { id: "A02", label: "Cryptographic Failures", count: 6, severity: "high" as const },
+  { id: "A03", label: "Injection", count: 9, severity: "high" as const },
+  { id: "A04", label: "Insecure Design", count: 4, severity: "medium" as const },
+  { id: "A05", label: "Security Misconfiguration", count: 11, severity: "medium" as const },
+  { id: "A06", label: "Vulnerable Components", count: 7, severity: "medium" as const },
+  { id: "A07", label: "Authentication Failures", count: 5, severity: "high" as const },
+  { id: "A08", label: "Software & Data Integrity", count: 2, severity: "low" as const },
+  { id: "A09", label: "Logging Failures", count: 3, severity: "low" as const },
+  { id: "A10", label: "Server-Side Request Forgery", count: 1, severity: "low" as const },
+];
 
-const SEV_COLOR: Record<(typeof OWASP_DATA)[number]["severity"], string> = {
+const SEV_COLOR: Record<string, string> = {
   critical: "#F43F5E",
   high: "#FB7185",
   medium: "#F59E0B",
   low: "#FACC15",
 };
 
-export function OwaspDistribution() {
+export interface OwaspItem {
+  id: string;
+  label: string;
+  count: number;
+  severity: "critical" | "high" | "medium" | "low";
+}
+
+export function OwaspDistribution({ data }: { data?: OwaspItem[] }) {
+  const OWASP_DATA = data && data.length > 0 ? data : DEFAULT_DATA;
   const total = OWASP_DATA.reduce((acc, d) => acc + d.count, 0);
   let cumulative = 0;
   const r = 56;
