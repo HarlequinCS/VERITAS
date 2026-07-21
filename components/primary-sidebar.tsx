@@ -31,19 +31,15 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     title: "Workspace",
     items: [
       { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/targets/new", label: "Targets", icon: Target },
+      { href: "/targets/new", label: "New target", icon: Target },
     ],
   },
   {
     title: "Operations",
     items: [
-      { href: "/scans/live", label: "Live Scans", icon: Activity, badge: "2" },
-      {
-        href: "/vulnerabilities/cwe-285",
-        label: "Vulnerabilities",
-        icon: ShieldAlert,
-        badge: "14",
-      },
+      { href: "/scans/live", label: "Live Scans", icon: Activity },
+      { href: "/vulnerabilities", label: "Vulnerabilities", icon: ShieldAlert },
+      { href: "/tickets", label: "Tickets", icon: FileText },
     ],
   },
   {

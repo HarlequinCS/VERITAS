@@ -231,66 +231,78 @@ export default async function DashboardPage() {
 
       {/* KPI row */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Registered targets"
-          value={totalScans}
-          sublabel="solo + team workspaces"
-          icon={Target}
-          accent="cyan"
-          trend="flat"
-          trendValue="0.0%"
-          spark={[totalScans]}
-        />
-        <StatCard
-          label="Completed sessions"
-          value={completedScans}
-          sublabel="Pending → Processing → Done"
-          icon={ScanLine}
-          accent="purple"
-          trend="flat"
-          trendValue="0.0%"
-          spark={[completedScans]}
-        />
-        <StatCard
-          label="Critical findings"
-          value={totalCritical}
-          sublabel="Across all scans"
-          icon={ShieldAlert}
-          accent="rose"
-          trend="flat"
-          trendValue="0.0%"
-          spark={[totalCritical]}
-        />
-        <StatCard
-          label="Open tickets"
-          value={openTickets}
-          sublabel="dev review queue"
-          icon={AlertTriangle}
-          accent="amber"
-          trend="flat"
-          trendValue="0.0%"
-          spark={[openTickets]}
-        />
+        <div className="animate-fade-up" style={{ animationDelay: "40ms" }}>
+          <StatCard
+            label="Registered targets"
+            value={totalScans}
+            sublabel="solo + team workspaces"
+            icon={Target}
+            accent="cyan"
+            trend="flat"
+            trendValue="0.0%"
+            spark={[totalScans]}
+          />
+        </div>
+        <div className="animate-fade-up" style={{ animationDelay: "80ms" }}>
+          <StatCard
+            label="Completed sessions"
+            value={completedScans}
+            sublabel="Pending → Processing → Done"
+            icon={ScanLine}
+            accent="purple"
+            trend="flat"
+            trendValue="0.0%"
+            spark={[completedScans]}
+          />
+        </div>
+        <div className="animate-fade-up" style={{ animationDelay: "120ms" }}>
+          <StatCard
+            label="Critical findings"
+            value={totalCritical}
+            sublabel="Across all scans"
+            icon={ShieldAlert}
+            accent="rose"
+            trend="flat"
+            trendValue="0.0%"
+            spark={[totalCritical]}
+          />
+        </div>
+        <div className="animate-fade-up" style={{ animationDelay: "160ms" }}>
+          <StatCard
+            label="Open tickets"
+            value={openTickets}
+            sublabel="dev review queue"
+            icon={AlertTriangle}
+            accent="amber"
+            trend="flat"
+            trendValue="0.0%"
+            spark={[openTickets]}
+          />
+        </div>
       </div>
 
       {/* Charts row */}
       <div className="mt-6 grid gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-2">
+        <div className="animate-fade-up xl:col-span-2" style={{ animationDelay: "200ms" }}>
           <OwaspDistribution data={owaspData} />
         </div>
-        <ThreatHeatmap />
+        <div className="animate-fade-up" style={{ animationDelay: "240ms" }}>
+          <ThreatHeatmap />
+        </div>
       </div>
 
       {/* Table + side rail */}
       <div className="mt-6 grid gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-2">
+        <div className="animate-fade-up xl:col-span-2" style={{ animationDelay: "280ms" }}>
           <ScanSessionTable sessions={sessions} />
         </div>
-        <LiveActivityRail />
+        <div className="animate-fade-up" style={{ animationDelay: "320ms" }}>
+          <LiveActivityRail />
+        </div>
       </div>
 
       {/* Agents row */}
-      <div className="mt-6">
+      <div className="mt-6 animate-fade-up" style={{ animationDelay: "360ms" }}>
         <AgentStatusGrid />
       </div>
     </main>

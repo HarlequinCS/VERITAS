@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { redirect } from 'next/navigation'
 
 type AuthResult = { error: string; success?: boolean }
@@ -105,7 +106,7 @@ export async function signUpUser(
     if (!valid) return { error: 'Turnstile verification failed. Please try again.' }
 
     const supabase = await createClient()
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -122,10 +123,110 @@ export async function signUpUser(
       return { error: msg }
     }
 
+    // When email confirmation is enabled, Supabase does NOT error on a
+    // duplicate email (to prevent enumeration). It instead returns a user
+    // with an empty `identities` array. Detect that and surface a clear error.
+    if (data.user && (data.user.identities?.length ?? 0) === 0) {
+      return { error: 'An account with this email already exists. Please sign in instead.' }
+    }
+
     return { error: '', success: true }
   } catch (err) {
     if (isNextInternalSignal(err)) throw err
     console.error('[signUpUser]', err)
+    return { error: toMessage(err) }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Request password reset — sends a recovery email
+// ---------------------------------------------------------------------------
+export async function requestPasswordReset(
+  _prevState: AuthResult,
+  formData: FormData
+): Promise<AuthResult> {
+  try {
+    const email = (formData.get('email') as string)?.trim().toLowerCase()
+    if (!email) return { error: 'Email address is required.' }
+
+    // Verify the email exists in our database before sending a reset.
+    const admin = createAdminClient()
+    const { data: existing, error: dbError } = await admin
+      .from('users')
+      .select('email')
+      .eq('email', email)
+      .maybeSingle()
+
+    if (dbError) {
+      console.error('[requestPasswordReset] DB lookup error:', dbError)
+      return { error: 'Could not verify email. Please try again later.' }
+    }
+
+    if (!existing) {
+      return { error: 'No account found with this email address.' }
+    }
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+    const supabase = await createClient()
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${siteUrl}/auth/confirm?next=/auth/reset-password`,
+    })
+
+    if (error) {
+      console.error('[requestPasswordReset] Supabase error object:', error)
+      const msg = error.message === '{}' || !error.message
+        ? 'Could not reach the authentication server. Please try again later.'
+        : error.message
+      return { error: msg }
+    }
+
+    return { error: '', success: true }
+  } catch (err) {
+    if (isNextInternalSignal(err)) throw err
+    console.error('[requestPasswordReset]', err)
+    return { error: toMessage(err) }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Update password — used by the reset-password page after a recovery session
+// has been established.
+// ---------------------------------------------------------------------------
+export async function updatePassword(
+  _prevState: AuthResult,
+  formData: FormData
+): Promise<AuthResult> {
+  try {
+    const password = formData.get('password') as string
+    const confirm = formData.get('confirmPassword') as string
+
+    if (!password || !confirm)
+      return { error: 'Please enter and confirm your new password.' }
+    if (password.length < 8)
+      return { error: 'Password must be at least 8 characters.' }
+    if (password !== confirm)
+      return { error: 'Passwords do not match.' }
+
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user)
+      return { error: 'Your reset link has expired. Please request a new one.' }
+
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) {
+      console.error('[updatePassword] Supabase error object:', error)
+      const msg = error.message === '{}' || !error.message
+        ? 'Could not update your password. Please try again later.'
+        : error.message
+      return { error: msg }
+    }
+
+    return { error: '', success: true }
+  } catch (err) {
+    if (isNextInternalSignal(err)) throw err
+    console.error('[updatePassword]', err)
     return { error: toMessage(err) }
   }
 }
