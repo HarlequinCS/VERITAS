@@ -68,6 +68,8 @@ const config: Config = {
         "pulse-ring": "pulse-ring 1.5s ease-out infinite",
         "ticker": "ticker 40s linear infinite",
         "counter-roll": "counter-roll 2s ease-out both",
+        "loader-progress": "loader-progress 2.8s ease-out forwards",
+        "success-pop": "success-pop 480ms cubic-bezier(.16,1,.3,1) both",
       },
       keyframes: {
         "pulse-electric": {
@@ -111,6 +113,17 @@ const config: Config = {
         "counter-roll": {
           "0%": { opacity: "0", transform: "translateY(12px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "loader-progress": {
+          "0%": { width: "0%" },
+          "40%": { width: "45%" },
+          "75%": { width: "78%" },
+          "100%": { width: "92%" },
+        },
+        "success-pop": {
+          "0%": { opacity: "0", transform: "scale(0.6)" },
+          "60%": { opacity: "1", transform: "scale(1.08)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
         },
       },
     },

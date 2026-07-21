@@ -3,6 +3,29 @@ import { createClient } from "@/utils/supabase/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ShieldAlert, ChevronRight } from "lucide-react";
 
+type VulnerabilityRow = {
+  vuln_id: string;
+  cwe_id: string | null;
+  owasp_category: string | null;
+  severity_level: string;
+  endpoint_url: string | null;
+  is_false_positive: boolean;
+  scan_sessions:
+    | {
+        target_applications:
+          | { target_url: string | null }
+          | Array<{ target_url: string | null }>
+          | null;
+      }
+    | Array<{
+        target_applications:
+          | { target_url: string | null }
+          | Array<{ target_url: string | null }>
+          | null;
+      }>
+    | null;
+};
+
 const SEV_COLOR: Record<string, string> = {
   Critical: "text-rose-300 border-rose-400/30 bg-rose-400/10",
   High: "text-amber-300 border-amber-400/30 bg-amber-400/10",
@@ -13,7 +36,7 @@ const SEV_COLOR: Record<string, string> = {
 
 export default async function VulnerabilitiesPage() {
   const supabase = await createClient();
-  let vulns: any[] = [];
+  let vulns: VulnerabilityRow[] = [];
   let error: string | null = null;
 
   try {
@@ -70,7 +93,10 @@ export default async function VulnerabilitiesPage() {
       {!error && vulns.length > 0 && (
         <div className="glass mt-8 overflow-hidden rounded-2xl">
           {vulns.map((v) => {
-            const ta = v.scan_sessions?.target_applications;
+            const session = Array.isArray(v.scan_sessions)
+              ? v.scan_sessions[0]
+              : v.scan_sessions;
+            const ta = session?.target_applications;
             const targetUrl =
               (Array.isArray(ta) ? ta[0]?.target_url : ta?.target_url) ??
               "Unknown";

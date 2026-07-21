@@ -3,6 +3,25 @@ import { Clock, FileText, UserRound } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { EmptyState } from "@/components/ui/empty-state";
 
+type TicketRow = {
+  ticket_id: string;
+  ticket_status: string;
+  sla_due_date: string | null;
+  created_at: string;
+  detected_vulnerabilities:
+    | {
+        cwe_id: string | null;
+        owasp_category: string | null;
+        endpoint_url: string | null;
+      }
+    | Array<{
+        cwe_id: string | null;
+        owasp_category: string | null;
+        endpoint_url: string | null;
+      }>
+    | null;
+};
+
 function fmtSLA(due: string | null): string {
   if (!due) return "No SLA";
   const diff = new Date(due).getTime() - Date.now();
@@ -29,7 +48,7 @@ function statusStyle(status: string) {
 
 export default async function TicketsPage() {
   const supabase = await createClient();
-  let tickets: any[] = [];
+  let tickets: TicketRow[] = [];
   let error: string | null = null;
 
   try {
@@ -83,12 +102,14 @@ export default async function TicketsPage() {
       {!error && tickets.length > 0 && (
         <div className="glass mt-8 overflow-hidden rounded-2xl">
           {tickets.map((t) => {
-            const vuln = t.detected_vulnerabilities;
+            const vuln = Array.isArray(t.detected_vulnerabilities)
+              ? t.detected_vulnerabilities[0]
+              : t.detected_vulnerabilities;
             const finding = vuln
               ? `${vuln.cwe_id ?? "CWE-???"} · ${vuln.owasp_category ?? "Unknown"}`
               : "Unknown finding";
             const owner = "Unassigned";
-            const ticketId = (t.ticket_id as string).slice(0, 8).toUpperCase();
+            const ticketId = t.ticket_id.slice(0, 8).toUpperCase();
             return (
               <Link
                 key={t.ticket_id}

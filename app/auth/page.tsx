@@ -73,9 +73,9 @@ export default function AuthPage() {
 
   function handleOAuth(provider: 'google' | 'github') {
     if (provider === 'google') {
-      startGoogle(() => signInWithProvider('google'))
+      startGoogle(() => signInWithProvider(provider, 'signin'))
     } else {
-      startGitHub(() => signInWithProvider('github'))
+      startGitHub(() => signInWithProvider(provider, 'signin'))
     }
   }
 

@@ -235,13 +235,21 @@ export async function updatePassword(
 // Sign In with OAuth provider (Google / GitHub)
 // ---------------------------------------------------------------------------
 export async function signInWithProvider(
-  provider: 'google' | 'github'
+  provider: 'google' | 'github',
+  flow: 'signin' | 'signup' = 'signup'
 ): Promise<void> {
   const supabase = await createClient()
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+  const queryParams: Record<string, string> = {}
+  if (provider === 'google') {
+    queryParams.prompt = 'select_account'
+  }
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/auth/callback`,
+      redirectTo: `${siteUrl}/auth/callback?flow=${flow}`,
+      queryParams,
     },
   })
 

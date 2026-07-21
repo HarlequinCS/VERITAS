@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse, type NextRequest } from 'next/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { sendWelcomeEmail } from '@/lib/welcome-email'
 
 /**
@@ -14,6 +15,7 @@ import { sendWelcomeEmail } from '@/lib/welcome-email'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  const flow = searchParams.get('flow')  // 'signin' | 'signup' | null
 
   // Guard: no code means the user denied access or hit this URL directly
   if (!code) {
@@ -44,6 +46,26 @@ export async function GET(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  // ── Sign-in flow check: reject new users trying to sign in ─────────
+  if (flow === 'signin' && user && user.user_metadata?.onboarded !== true) {
+    // Clear session first so the redirect doesn't carry auth cookies
+    await supabase.auth.signOut()
+
+    // Clean up the auth user if service role key is available
+    try {
+      const admin = createAdminClient()
+      await admin.auth.admin.deleteUser(user.id)
+    } catch {
+      // orphan is harmless — no session means they see the error page
+    }
+
+    return NextResponse.redirect(
+      new URL('/auth?error=' + encodeURIComponent(
+        'No account found with this provider. Please sign up first.'
+      ), origin)
+    )
+  }
 
   if (user) {
     const { data: existing } = await supabase

@@ -8,11 +8,13 @@ export default async function AccountPage() {
   let username = "User";
   let role = "Workspace";
   let email = "";
+  let authMethod = "email";
 
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       email = user.email ?? "";
+      authMethod = user.app_metadata?.provider ?? 'email'
       const { data: profile } = await supabase
         .from("users")
         .select("username, role")
@@ -32,7 +34,9 @@ export default async function AccountPage() {
       <section className="glass mt-8 rounded-2xl p-5">
         <UserRound className="h-7 w-7 text-veritas-electric" />
         <h2 className="mt-4 text-lg font-semibold text-white">{username}</h2>
-        <p className="mt-1 text-sm text-slate-400">{role} · {email || "Workspace"}</p>
+        <p className="mt-1 text-sm text-slate-400">
+          {role} · {email || "Workspace"} · Signed in with {authMethod === 'google' ? 'Google' : authMethod === 'github' ? 'GitHub' : 'Email'}
+        </p>
         <p className="mt-4 text-sm leading-relaxed text-slate-400">
           Workspace roles are assigned by the workspace owner. The public scanner
           account is intentionally separate from the private founder operations console.
