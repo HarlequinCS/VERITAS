@@ -1,26 +1,37 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 
 const CONTENT = {
   scan: {
-    title: "Asynchronous scan sessions",
-    label: "SCAN",
-    body: "FastAPI accepts a target, validates the request, creates a Pending scan session, and sends long-running work to Celery so the UI stays responsive.",
-    bullets: ["Target registration", "Pending → Processing state", "Redis-backed background queue", "Workspace-safe production controls"],
+    title: "A scan session for the application you register",
+    label: "Scan",
+    body: "You submit a target you are allowed to test. VERITAS creates a session and runs the work away from the page, so the session can be Pending, Processing, Completed, or Failed.",
+    bullets: ["Target URL and environment", "Optional authentication", "A session you can leave and return to", "Findings attached to that session"],
   },
   simulate: {
-    title: "Playwright exploit simulation",
-    label: "PROVE",
-    body: "VERITAS launches an ephemeral Chromium context, injects scoped auth state, executes payloads, and captures DOM changes plus visual proof.",
-    bullets: ["Ephemeral browser contexts", "JWT and cookie injection", "DOM mutation telemetry", "Screenshot-backed PoC evidence"],
+    title: "Proof from an isolated browser",
+    label: "Prove",
+    body: "Playwright opens a separate browser, uses the auth you provided, and records the page change. The finding keeps the trace and the screenshot with the severity.",
+    bullets: ["Isolated browser context", "Auth you supplied for the target", "Recorded page and response changes", "Screenshot evidence on the finding"],
   },
   solve: {
-    title: "AI remediation workflow",
-    label: "PATCH",
-    body: "A three-agent loop classifies the finding, synthesizes patch guidance, validates the output, and prepares work for a solo developer or team ticket.",
-    bullets: ["CWE and OWASP mapping", "Patch snippets", "Validator self-reflection", "Ticket-ready remediation notes"],
+    title: "A classified fix a person can own",
+    label: "Fix",
+    body: "The finding is mapped to a CWE weakness and an OWASP category. A suggested change is checked, then a developer applies it or a lead assigns the ticket.",
+    bullets: ["CWE and OWASP labels", "A suggested code change", "Ticket statuses from Open to Closed", "A solo queue or a team assignment"],
   },
 } as const;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const item = CONTENT[slug as keyof typeof CONTENT] ?? CONTENT.scan;
+  return { title: item.title, description: item.body };
+}
 
 export default async function FeaturePage({
   params,
@@ -33,7 +44,7 @@ export default async function FeaturePage({
   return (
     <main className="min-h-dvh px-4 pb-24 pt-32 sm:px-6 lg:px-8">
       <section className="mx-auto max-w-4xl">
-        <Link href="/#features" className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white">
+        <Link href="/platform" className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white">
           <ArrowLeft className="h-4 w-4" /> Back to platform
         </Link>
         <p className="mt-10 font-label text-xs uppercase tracking-[0.2em] text-veritas-electric">

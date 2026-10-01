@@ -107,7 +107,7 @@ export default function TargetSetupPage() {
                 <input
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://app.acme.io"
+                  placeholder="https://example.com"
                   className="h-11 w-full rounded-xl border border-veritas-border-subtle bg-veritas-surface/40 pl-10 pr-12 font-mono text-sm text-white outline-none placeholder:text-slate-600 focus:border-veritas-electric/50 focus:shadow-glow-electric"
                 />
                 <span

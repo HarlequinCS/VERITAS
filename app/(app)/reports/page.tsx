@@ -10,7 +10,6 @@ import {
   FileText,
   GripVertical,
   Image as ImageIcon,
-  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import Image from "next/image";
@@ -31,18 +30,11 @@ const SECTIONS = [
   { id: "appendix", label: "Appendix · Evidence", default: true },
 ];
 
-const COMPLIANCE = [
-  { framework: "ISO 27001", pass: 38, fail: 2, na: 6 },
-  { framework: "SOC 2 Type II", pass: 41, fail: 3, na: 4 },
-  { framework: "PCI-DSS v4", pass: 22, fail: 4, na: 12 },
-  { framework: "GDPR", pass: 18, fail: 1, na: 9 },
-] as const;
-
-const FINDINGS = [
-  { sev: "critical" as const, label: "Broken Access Control", count: 3 },
-  { sev: "high" as const, label: "Authentication Failures", count: 5 },
-  { sev: "medium" as const, label: "Security Misconfiguration", count: 11 },
-  { sev: "low" as const, label: "Logging Failures", count: 4 },
+const EMPTY_FINDINGS: FindingItem[] = [
+  { sev: "critical", label: "Critical vulnerabilities", count: 0 },
+  { sev: "high", label: "High severity findings", count: 0 },
+  { sev: "medium", label: "Medium severity issues", count: 0 },
+  { sev: "low", label: "Low or informational", count: 0 },
 ];
 
 type FindingItem = { sev: "critical" | "high" | "medium" | "low"; label: string; count: number };
@@ -52,7 +44,7 @@ export default function ReportStudioPage() {
   const [enabled, setEnabled] = useState<Record<string, boolean>>(
     Object.fromEntries(SECTIONS.map((s) => [s.id, s.default])),
   );
-  const [findings, setFindings] = useState<FindingItem[]>(FINDINGS);
+  const [findings, setFindings] = useState<FindingItem[]>(EMPTY_FINDINGS);
   const [findingsLoading, setFindingsLoading] = useState(true);
 
   useEffect(() => {
@@ -63,7 +55,7 @@ export default function ReportStudioPage() {
       .eq("is_false_positive", false)
       .then(({ data, error }) => {
         if (error || !data) {
-          setFindings(FINDINGS);
+          setFindings(EMPTY_FINDINGS);
           setFindingsLoading(false);
           return;
         }
@@ -87,7 +79,7 @@ export default function ReportStudioPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       {/* Header */}
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -138,13 +130,12 @@ export default function ReportStudioPage() {
             >
               <span className="flex min-w-0 items-center gap-2">
                 <Calendar className="h-3.5 w-3.5 text-veritas-electric" />
-                <span className="font-mono text-veritas-arc">sess-2098</span>
-                <span className="truncate text-slate-400">· app.acme.io</span>
+                <span className="text-slate-200">No scan session yet</span>
               </span>
               <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
             </Link>
-            <p className="mt-2 text-[11px] text-slate-500">
-              Includes 23 findings · 3 critical · 5 high
+            <p className="mt-2 text-sm text-slate-300">
+              A report can be built after this workspace has a completed scan.
             </p>
           </section>
 
@@ -354,50 +345,9 @@ export default function ReportStudioPage() {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                     Compliance checklist
                   </p>
-                  <div className="mt-3 overflow-hidden rounded-lg border border-veritas-border-subtle">
-                    <table className="w-full text-xs">
-                      <thead className="bg-veritas-surface/40 text-[10px] uppercase tracking-wider text-slate-500">
-                        <tr>
-                          <th className="px-3 py-2 text-left">Framework</th>
-                          <th className="px-3 py-2 text-right">Pass</th>
-                          <th className="px-3 py-2 text-right">Fail</th>
-                          <th className="px-3 py-2 text-right">N/A</th>
-                          <th className="px-3 py-2 text-right">Score</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {COMPLIANCE.map((c) => {
-                          const total = c.pass + c.fail + c.na;
-                          const score = Math.round((c.pass / total) * 100);
-                          return (
-                            <tr
-                              key={c.framework}
-                              className="border-t border-veritas-border-subtle/70 text-slate-200"
-                            >
-                              <td className="px-3 py-2">
-                                <div className="flex items-center gap-2">
-                                  <ShieldCheck className="h-3.5 w-3.5 text-veritas-electric" />
-                                  <span>{c.framework}</span>
-                                </div>
-                              </td>
-                              <td className="px-3 py-2 text-right text-emerald-300">
-                                {c.pass}
-                              </td>
-                              <td className="px-3 py-2 text-right text-rose-300">
-                                {c.fail}
-                              </td>
-                              <td className="px-3 py-2 text-right text-slate-400">
-                                {c.na}
-                              </td>
-                              <td className="px-3 py-2 text-right font-mono text-white">
-                                {score}%
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                  <p className="mt-3 text-base leading-relaxed text-slate-300">
+                    Compliance scores are not available. This workspace does not map findings to ISO, SOC 2, PCI, or GDPR.
+                  </p>
                 </section>
 
                 {/* AI exec summary */}
@@ -410,19 +360,15 @@ export default function ReportStudioPage() {
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-veritas-arc">
                         ✦ AI executive narrative
                       </p>
-                      <p className="mt-1.5 text-xs leading-relaxed text-slate-300">
-                        Posture improved 12% versus Q2. The remaining critical
-                        risk is concentrated in legacy admin tooling. Closing
-                        the top 3 access-control findings would reduce
-                        residual risk to{" "}
-                        <span className="text-emerald-300">low</span>.
+                      <p className="mt-1.5 text-base leading-relaxed text-slate-300">
+                        No narrative is generated until this workspace has findings from a completed scan.
                       </p>
                     </div>
                   </div>
                 </section>
 
-                <footer className="flex items-center justify-between border-t border-veritas-border-subtle pt-4 text-[10px] text-slate-500">
-                  <span className="font-mono">VR-2026-Q3-019 · page 1 / 12</span>
+                <footer className="flex items-center justify-between border-t border-veritas-border-subtle pt-4 text-xs text-slate-300">
+                  <span>No report has been generated.</span>
                   <span className="inline-flex items-center gap-1">
                     <CheckCircle2 className="h-3 w-3 text-emerald-300" />
                     Confidential — Acme Inc.

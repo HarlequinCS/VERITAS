@@ -19,16 +19,16 @@ export function CtaBanner() {
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <Link
-            href="/auth"
+            href="/register"
             className="inline-flex items-center rounded-lg bg-electric-mix px-8 py-3.5 font-label text-xs font-semibold uppercase tracking-[0.12em] text-white shadow-glow-electric transition hover:opacity-90"
           >
-            Launch Mock Scanner
+            Create account
           </Link>
           <Link
-            href="/tickets"
+            href="/pricing"
             className="inline-flex items-center rounded-lg border border-veritas-border-subtle px-8 py-3.5 font-label text-xs font-semibold uppercase tracking-[0.12em] text-slate-300 transition hover:border-veritas-electric/40 hover:text-white"
           >
-            View Team Workflow
+            View pricing
           </Link>
         </div>
       </div>

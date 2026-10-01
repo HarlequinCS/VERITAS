@@ -9,8 +9,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const NAV_LINKS = [
-  { href: "/#features", label: "Platform" },
-  { href: "/#how-it-works", label: "How It Works" },
+  { href: "/platform", label: "Platform" },
+  { href: "/how-it-works", label: "How It Works" },
   { href: "/pricing", label: "Pricing" },
   { href: "/blog", label: "Blog" },
 ] as const;

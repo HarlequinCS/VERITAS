@@ -1,7 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse, type NextRequest } from 'next/server'
-import { createAdminClient } from '@/utils/supabase/admin'
-import { sendWelcomeEmail } from '@/lib/welcome-email'
+import { publicOrigin } from '@/lib/public-origin'
 
 /**
  * OAuth callback handler.
@@ -13,7 +12,8 @@ import { sendWelcomeEmail } from '@/lib/welcome-email'
  * to /dashboard.
  */
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url)
+  const { searchParams } = new URL(request.url)
+  const origin = publicOrigin(request)
   const code = searchParams.get('code')
   const flow = searchParams.get('flow')  // 'signin' | 'signup' | null
 
@@ -47,26 +47,6 @@ export async function GET(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // ── Sign-in flow check: reject new users trying to sign in ─────────
-  if (flow === 'signin' && user && user.user_metadata?.onboarded !== true) {
-    // Clear session first so the redirect doesn't carry auth cookies
-    await supabase.auth.signOut()
-
-    // Clean up the auth user if service role key is available
-    try {
-      const admin = createAdminClient()
-      await admin.auth.admin.deleteUser(user.id)
-    } catch {
-      // orphan is harmless — no session means they see the error page
-    }
-
-    return NextResponse.redirect(
-      new URL('/auth?error=' + encodeURIComponent(
-        'No account found with this provider. Please sign up first.'
-      ), origin)
-    )
-  }
-
   if (user) {
     const { data: existing } = await supabase
       .from('users')
@@ -92,21 +72,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Send welcome email to OAuth users (non-blocking)
-    const provider = user.app_metadata?.provider as string | undefined
-    const method = provider === 'github' ? 'GitHub' as const : 'Google' as const
-    const uname =
-      (user.user_metadata?.username as string) ??
-      user.email?.split('@')[0] ??
-      'there'
-
-    sendWelcomeEmail({
-      email: user.email!,
-      username: uname,
-      method,
-    }).catch((e) => console.error('[auth/callback] welcome email error:', e))
   }
 
-  // Session set — redirect to dashboard
-  return NextResponse.redirect(new URL('/dashboard', origin))
+  const next = flow === 'link' ? '/account/security' : '/dashboard'
+  return NextResponse.redirect(new URL(next, origin))
 }

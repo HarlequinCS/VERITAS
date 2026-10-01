@@ -37,5 +37,10 @@ yarn-error.log*
 .env*.local
 .env
 
+# runtime logs
+logs/
+
 # vercel
 .vercel
+
+.design-rules/

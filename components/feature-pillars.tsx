@@ -8,7 +8,7 @@ const FEATURES = [
     iconBg: "bg-veritas-electric/10",
     tag: "SCAN",
     title: "Start a scan without blocking your workflow",
-    body: "Submit a target URL, receive a scan session instantly, and let Celery workers run the heavy browser simulation in the background.",
+    body: "Submit a target you are allowed to test. VERITAS opens a scan session and runs the browser work away from the page you are on.",
     href: "/features/scan",
   },
   {
@@ -17,7 +17,7 @@ const FEATURES = [
     iconBg: "bg-veritas-arc/10",
     tag: "PROVE",
     title: "Capture proof, not just scanner noise",
-    body: "Playwright reproduces attack paths in an isolated browser context, watches DOM and response changes, then stores visual PoC evidence.",
+    body: "An isolated browser follows the path, records what changed, and stores the trace and screenshot with the finding.",
     href: "/features/simulate",
     badge: "HYBRID DAST",
   },
@@ -27,7 +27,7 @@ const FEATURES = [
     iconBg: "bg-veritas-success/10",
     tag: "PATCH",
     title: "Fix it yourself or assign it to a team",
-    body: "A 3-agent AI loop classifies the weakness, drafts a patch, validates the output, and turns it into remediation work for solo or team delivery.",
+    body: "The finding is mapped to a weakness class, a suggested change is checked, and a developer applies it or a lead assigns the ticket.",
     href: "/features/solve",
   },
 ];
@@ -49,8 +49,7 @@ export function FeaturePillars() {
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-slate-400 sm:text-base">
             Solo developers can run a target scan and ship the recommended fix.
-            Teams can route the same finding through leads, developers, SLA
-            queues, and verification.
+            Teams can route the same finding through an owner, analysts, and developers.
           </p>
         </div>
 

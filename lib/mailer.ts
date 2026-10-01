@@ -19,6 +19,9 @@ export async function sendEmail({
   subject: string;
   html: string;
 }) {
+  if (!process.env.MAIL_HOST || !process.env.MAIL_FROM) {
+    throw new Error("Mail is not configured. Set MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS, and MAIL_FROM.");
+  }
   await transporter.sendMail({
     from: `"VERITAS" <${process.env.MAIL_FROM!}>`,
     to,

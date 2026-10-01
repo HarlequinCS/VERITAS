@@ -1,85 +1,75 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Bug, FileText, ShieldAlert } from "lucide-react";
+import { MarketingActions } from "@/components/marketing-actions";
+import { posts } from "@/lib/blog";
 
-const POSTS = [
-  {
-    icon: ShieldAlert,
-    tag: "Threat Intel",
-    title: "What CISA KEV tells us about exploited vulnerabilities",
-    body: "How VERITAS uses public exploited-CVE signals to contextualize scan findings and severity.",
-  },
-  {
-    icon: Bug,
-    tag: "Hybrid DAST",
-    title: "Why visual proof beats noisy scanner output",
-    body: "A walkthrough of headless browser simulation, DOM mutation capture, and screenshot-backed evidence.",
-  },
-  {
-    icon: FileText,
-    tag: "Remediation",
-    title: "From CWE classification to developer-ready patch notes",
-    body: "How the classifier, synthesizer, and validator agent loop turns a trace into practical remediation.",
-  },
-];
+export const metadata: Metadata = {
+  title: "VERITAS blog",
+  description:
+    "Guides for reading a VERITAS finding, testing an application you own, and running a remediation queue.",
+};
 
-export default function BlogPage() {
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const { category } = await searchParams;
+  const visible = category
+    ? posts.filter((post) => post.category.toLowerCase() === category.toLowerCase())
+    : posts;
+  const [featured, ...rest] = visible;
   return (
-    <main className="min-h-dvh px-4 pb-24 pt-32 sm:px-6 lg:px-8">
+    <main className="px-4 pb-24 pt-32 sm:px-6 lg:px-8">
       <section className="mx-auto max-w-6xl">
-        <p className="font-label text-xs uppercase tracking-[0.2em] text-veritas-electric">
-          Threat Intelligence
-        </p>
-        <h1 className="mt-3 font-display text-4xl font-bold text-white sm:text-5xl">
-          From the VERITAS lab.
+        <p className="font-label text-xs uppercase tracking-[0.2em] text-veritas-electric">Blog</p>
+        <h1 className="mt-3 max-w-3xl font-display text-4xl font-bold text-white sm:text-5xl">
+          Notes on testing your own applications.
         </h1>
-        <p className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-400 sm:text-base">
-          Research notes for developers, security leads, and teams building a
-          clean vulnerability remediation workflow around real exploit evidence.
+        <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-400">
+          Guides for reading a finding and running a remediation queue. New pieces are published when they describe the product as it works.
         </p>
-
-        <article className="mt-12 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-6 lg:flex lg:items-center lg:justify-between lg:gap-10">
-          <div>
-            <span className="font-label text-[10px] uppercase tracking-[0.18em] text-rose-300">
-              Critical Advisory
-            </span>
-            <h2 className="mt-3 text-2xl font-semibold text-white">
-              Broken access control is still the fastest path from user to admin.
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-300">
-              The VERITAS mock workflow demonstrates how a direct route request
-              becomes a reproducible Playwright trace, an AI root-cause summary,
-              and a ticket a developer can actually fix.
-            </p>
-          </div>
-          <Link
-            href="/vulnerabilities/cwe-285"
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-electric-mix px-4 py-3 font-label text-xs font-semibold uppercase tracking-[0.12em] text-veritas-bg lg:mt-0"
-          >
-            Open Example Finding
-            <ArrowRight className="h-4 w-4" />
+        <MarketingActions
+          primaryHref="/register"
+          primaryLabel="Create account"
+          secondaryHref="/platform"
+          secondaryLabel="Explore the platform"
+        />
+        <div className="mt-8 flex flex-wrap gap-2">
+          <Link href="/blog" className="rounded-full border border-veritas-electric/40 px-3 py-1.5 text-sm text-white">
+            All
           </Link>
-        </article>
-
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {POSTS.map((post) => (
-            <article
-              key={post.title}
-              className="rounded-2xl border border-veritas-border-subtle bg-veritas-surface/40 p-6 transition hover:border-veritas-electric/30"
-            >
-              <post.icon className="h-6 w-6 text-veritas-electric" />
-              <p className="mt-5 font-label text-[10px] uppercase tracking-[0.18em] text-veritas-electric">
-                {post.tag}
-              </p>
-              <h2 className="mt-2 text-lg font-semibold text-white">
-                {post.title}
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-slate-400">
-                {post.body}
-              </p>
-            </article>
-          ))}
+          <Link href="/blog?category=guides" className="rounded-full border border-veritas-border-subtle px-3 py-1.5 text-sm text-slate-300">
+            Guides
+          </Link>
         </div>
       </section>
+
+      {featured ? (
+        <article className="mx-auto mt-12 max-w-6xl rounded-2xl border border-veritas-border-subtle bg-veritas-surface/40 p-6 sm:p-8">
+          <p className="font-label text-xs uppercase tracking-[0.16em] text-veritas-electric">{featured.category}</p>
+          <h2 className="mt-3 text-2xl font-semibold text-white">{featured.title}</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-400">{featured.description}</p>
+          <p className="mt-3 text-sm text-slate-500">{featured.date}</p>
+          <Link href={`/blog/${featured.slug}`} className="mt-6 inline-flex text-sm font-semibold text-veritas-electric">
+            Read the guide
+          </Link>
+        </article>
+      ) : null}
+
+      {rest.length > 0 ? (
+        <ul className="mx-auto mt-8 grid max-w-6xl gap-4">
+          {rest.map((post) => (
+            <li key={post.slug}>
+              <Link href={`/blog/${post.slug}`} className="block rounded-2xl border border-veritas-border-subtle p-5">
+                <p className="text-xs uppercase tracking-[0.16em] text-veritas-electric">{post.category}</p>
+                <h2 className="mt-2 text-lg font-semibold text-white">{post.title}</h2>
+                <p className="mt-2 text-sm text-slate-400">{post.description}</p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </main>
   );
 }

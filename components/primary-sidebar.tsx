@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Activity,
+  Building2,
   ChevronsLeft,
   ChevronsRight,
   Crosshair,
@@ -46,6 +47,7 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     title: "Insights",
     items: [
       { href: "/reports", label: "Reports", icon: FileText },
+      { href: "/account/organization", label: "Organization", icon: Building2 },
       { href: "/settings", label: "Settings", icon: Settings },
     ],
   },
@@ -100,7 +102,7 @@ export function PrimarySidebar() {
         <button
           type="button"
           onClick={() => setCollapsed((c) => !c)}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-veritas-surface hover:text-white"
+          className="flex h-11 w-11 items-center justify-center rounded-md text-slate-300 transition hover:bg-veritas-surface hover:text-white"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           title="Toggle sidebar (⌘B)"
         >
@@ -116,7 +118,7 @@ export function PrimarySidebar() {
         {NAV_SECTIONS.map((section) => (
           <div key={section.title} className="mb-5">
             {!collapsed && (
-              <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+              <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
                 {section.title}
               </p>
             )}
@@ -128,7 +130,8 @@ export function PrimarySidebar() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className={`group relative flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition ${
+                      aria-label={item.label}
+                      className={`group relative flex min-h-11 items-center gap-3 rounded-lg px-2.5 py-2 text-base font-medium transition ${
                         active
                           ? "bg-veritas-surface-alt text-white"
                           : "text-slate-400 hover:bg-veritas-surface/70 hover:text-white"
@@ -150,7 +153,7 @@ export function PrimarySidebar() {
                         <>
                           <span className="flex-1 truncate">{item.label}</span>
                           {item.badge && (
-                            <span className="rounded-full border border-veritas-border-strong bg-veritas-bg px-1.5 py-0.5 text-[10px] font-semibold text-veritas-electric">
+                            <span className="rounded-full border border-veritas-border-strong bg-veritas-bg px-1.5 py-0.5 text-xs font-semibold text-veritas-electric">
                               {item.badge}
                             </span>
                           )}
@@ -188,7 +191,7 @@ export function PrimarySidebar() {
               <p className="truncate text-xs font-medium text-white">
                 2 scans active
               </p>
-              <p className="truncate text-[11px] text-slate-500">
+              <p className="truncate text-xs text-slate-300">
                 Live Operations Center
               </p>
             </div>

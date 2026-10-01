@@ -4,12 +4,10 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import { useRouter } from "next/navigation";
 import { signInWithProvider, signUpUser } from "@/app/actions/auth";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { ArrowRight, Lock, Mail, ShieldCheck, User } from "lucide-react";
+import { ArrowRight, Lock, Mail, User } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
-import Image from "next/image";
 import Link from "next/link";
 
-const ICON_SRC = "https://saifuliqbal.dev/veritasicon.png";
 const initialState = { error: '' as string, success: false as boolean }
 
 // ---------------------------------------------------------------------------
@@ -48,7 +46,8 @@ export default function RegisterPage() {
 
 
   return (
-    <div className="relative isolate flex min-h-dvh items-stretch">
+    <div className="relative isolate flex min-h-dvh items-center justify-center px-4 py-10">
+      <div className="flex w-full max-w-[1120px] items-stretch overflow-hidden rounded-2xl border border-veritas-border-subtle/70 bg-veritas-bg/40">
       {/* Animated backdrop */}
       <div
         aria-hidden={true}
@@ -70,8 +69,8 @@ export default function RegisterPage() {
       />
 
       {/* Left: Form */}
-      <main className="flex w-full items-center justify-center px-4 py-10 sm:px-8 lg:w-[55%]">
-        <div className="w-full max-w-[420px] animate-fade-up">
+      <main className="flex w-full max-w-[480px] items-center justify-center px-6 py-10 lg:w-[480px] lg:max-w-none lg:shrink-0">
+        <div className="w-full animate-fade-up">
           <div className="mb-10">
             <BrandLogo variant="hero" href="/" />
           </div>
@@ -245,7 +244,7 @@ export default function RegisterPage() {
       </main>
 
       {/* Right: Brand panel */}
-      <aside className="relative hidden flex-1 items-center justify-center overflow-hidden border-l border-veritas-border-subtle/70 bg-veritas-surface/30 px-10 lg:flex">
+      <aside className="relative hidden min-w-0 flex-1 items-center justify-center overflow-hidden border-l border-veritas-border-subtle/70 bg-veritas-surface/30 px-10 lg:flex">
         <div
           aria-hidden={true}
           className="absolute inset-0 grid-bg opacity-60"
@@ -257,38 +256,15 @@ export default function RegisterPage() {
           }}
         />
         <div className="relative max-w-md">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              SOC 2 Type II
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-veritas-electric/30 bg-veritas-electric/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-veritas-electric">
-              <ShieldCheck className="h-3 w-3" />
-              ISO 27001
-            </span>
-          </div>
-          <h2 className="mt-6 text-3xl font-semibold tracking-tight text-white">
-            Detect. Prove. Patch.
+          <h2 className="text-3xl font-semibold tracking-tight text-white">
+            Create the account you will sign in with.
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-slate-400">
-            VERITAS pairs asynchronous scan workers, Playwright evidence, and a
-            3-agent AI remediation loop so one developer can fix quickly, and a
-            team can assign and verify cleanly.
+          <p className="mt-3 text-base leading-relaxed text-slate-300">
+            A new account gets its own organization. You can invite teammates after you sign in. This site does not claim a compliance certification.
           </p>
-          <div className="glass mt-8 rounded-2xl p-5">
-            <div className="mb-3 flex items-center gap-2">
-              <Image src={ICON_SRC} alt="" width={20} height={20} className="opacity-90" />
-              <p className="font-mono text-[11px] text-veritas-arc/80">veritas.live · secure signup</p>
-            </div>
-            <ul className="space-y-2 font-mono text-[11px] text-slate-300">
-              <li className="flex gap-3"><span className="text-emerald-300">✓</span><span>End-to-end encrypted</span></li>
-              <li className="flex gap-3"><span className="text-veritas-electric">●</span><span>Supabase Auth · row-level security</span></li>
-              <li className="flex gap-3"><span className="text-veritas-arc">✦</span><span>Cloudflare Turnstile bot protection</span></li>
-              <li className="flex gap-3"><span className="text-emerald-300">✓</span><span>No credit card required</span></li>
-            </ul>
-          </div>
         </div>
       </aside>
+      </div>
     </div>
   );
 }

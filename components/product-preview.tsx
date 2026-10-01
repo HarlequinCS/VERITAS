@@ -6,7 +6,7 @@ export function ProductPreview() {
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[900px] max-w-full rounded-full bg-veritas-electric/5 blur-[120px]" />
       </div>
 
-      <div className="relative mx-auto max-w-5xl text-center">
+      <div className="relative mx-auto max-w-6xl text-center">
         <h2 className="font-display text-3xl sm:text-4xl font-bold text-white">
           A command centre for solo builders and security teams.
         </h2>
@@ -17,7 +17,7 @@ export function ProductPreview() {
       </div>
 
       {/* Mockup */}
-      <div className="relative mx-auto mt-14 max-w-5xl perspective-[2000px]">
+      <div className="relative mx-auto mt-14 max-w-6xl perspective-[2000px]">
         <div
           className="group relative transition-transform duration-700 ease-out hover:rotateX(0deg) hover:rotateY(0deg)"
           style={{
