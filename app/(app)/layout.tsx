@@ -1,27 +1,21 @@
-import { createClient } from "@/utils/supabase/server";
 import { CommandBar } from "@/components/command-bar";
 import { PrimarySidebar } from "@/components/primary-sidebar";
 import { AIAssistantDock } from "@/components/ai-assistant-dock";
+import { getOrgContext } from "@/lib/org";
 
 export default async function AppGroupLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
   let username = "User";
   let role = "Workspace";
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: profile } = await supabase
-        .from("users")
-        .select("username, role")
-        .eq("user_id", user.id)
-        .single();
-      if (profile?.username) username = profile.username;
-      if (profile?.role) role = profile.role;
+    const ctx = await getOrgContext();
+    if (ctx) {
+      username = ctx.displayName;
+      role = ctx.role ? `${ctx.role}${ctx.orgName ? ` · ${ctx.orgName}` : ""}` : role;
     }
   } catch {
     // fallback already set

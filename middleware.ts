@@ -47,6 +47,22 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth', request.url))
   }
 
+  if (isAppRoute && user) {
+    const activeOrgId = (user.user_metadata?.active_org_id as string | undefined) ?? null
+    const { data: access } = await supabase.rpc('my_access', { p_org: activeOrgId })
+    const row = Array.isArray(access) ? access[0] : access
+    const onAccount = request.nextUrl.pathname.startsWith('/account')
+    if (row && (row.status === 'suspended' || row.status === 'removed') && !onAccount) {
+      return NextResponse.redirect(new URL('/account?status=suspended', request.url))
+    }
+    if (row?.require_mfa && !onAccount) {
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+      if (aal?.currentLevel !== 'aal2') {
+        return NextResponse.redirect(new URL('/account/security', request.url))
+      }
+    }
+  }
+
   // Redirect /login to /auth for consistency
   if (request.nextUrl.pathname === '/login') {
     return NextResponse.redirect(new URL('/auth', request.url))

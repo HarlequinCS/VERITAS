@@ -33,7 +33,6 @@ export default async function DashboardPage() {
 
   let username = "Analyst";
   let userEmail = "";
-  let userRole = "Analyst";
   let authError: string | null = null;
   let needsProfileSetup = false;
 
@@ -49,11 +48,10 @@ export default async function DashboardPage() {
       userEmail = user.email ?? "";
       const { data: profile } = await supabase
         .from("users")
-        .select("username, role")
+        .select("username")
         .eq("user_id", user.id)
         .single();
       if (profile?.username) username = profile.username;
-      if (profile?.role) userRole = profile.role;
 
       // Show profile form if user hasn't completed onboarding
       needsProfileSetup = user.user_metadata?.onboarded !== true;
@@ -184,7 +182,7 @@ export default async function DashboardPage() {
   }
 
   return needsProfileSetup ? (
-    <ProfileSetupForm currentUsername={username} currentRole={userRole} email={userEmail} />
+    <ProfileSetupForm currentUsername={username} email={userEmail} />
   ) : (
     <main className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       {/* Global error banner */}

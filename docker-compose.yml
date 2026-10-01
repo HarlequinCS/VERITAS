@@ -1,0 +1,27 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+    image: veritas-web
+    container_name: veritas-web
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:3060:3000"
+    mem_limit: 512m
+    volumes:
+      - ./logs:/logs
+    command: ["sh", "-c", "npm start -- -H 0.0.0.0 -p 3000 2>&1 | tee -a /logs/app.log"]
+    networks:
+      - veritas
+
+networks:
+  veritas:
+    name: veritas-net
+    driver: bridge

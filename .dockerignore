@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+frontend
+backend
+payloads
+docs
+.env
+.env.*
+*.md
+logs
