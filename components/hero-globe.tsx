@@ -98,7 +98,7 @@ export function HeroGlobe() {
         .showAtmosphere(true)
         .atmosphereColor("#0088FF")
         .atmosphereAltitude(0.18)
-        .pointOfView({ lat: 18, lng: -35, altitude: 2.35 });
+        .pointOfView({ lat: 18, lng: 20, altitude: 1.85 });
 
       globeInstance = globe;
 
@@ -202,7 +202,7 @@ export function HeroGlobe() {
   return (
     <div
       ref={containerRef}
-      className="h-full min-h-[640px] w-full"
+      className="h-full w-full"
       aria-hidden
     />
   );

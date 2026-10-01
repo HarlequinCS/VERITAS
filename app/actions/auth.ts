@@ -1,7 +1,6 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
-import { createAdminClient } from '@/utils/supabase/admin'
 import { redirect } from 'next/navigation'
 
 type AuthResult = { error: string; success?: boolean }
@@ -111,7 +110,7 @@ export async function signUpUser(
       password,
       options: {
         data: { username },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/auth/confirmed`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://scanwithveritas.tech'}/auth/confirmed`,
       },
     })
 
@@ -139,7 +138,7 @@ export async function signUpUser(
 }
 
 // ---------------------------------------------------------------------------
-// Request password reset — sends a recovery email
+// Request password reset — emails a recovery code
 // ---------------------------------------------------------------------------
 export async function requestPasswordReset(
   _prevState: AuthResult,
@@ -149,41 +148,106 @@ export async function requestPasswordReset(
     const email = (formData.get('email') as string)?.trim().toLowerCase()
     if (!email) return { error: 'Email address is required.' }
 
-    // Verify the email exists in our database before sending a reset.
-    const admin = createAdminClient()
-    const { data: existing, error: dbError } = await admin
-      .from('users')
-      .select('email')
-      .eq('email', email)
-      .maybeSingle()
+    const supabase = await createClient()
+    const { data: exists, error: dbError } = await supabase.rpc('user_email_exists', {
+      p_email: email,
+    })
 
     if (dbError) {
       console.error('[requestPasswordReset] DB lookup error:', dbError)
-      return { error: 'Could not verify email. Please try again later.' }
+      return { error: 'Could not send a reset code. Please try again later.' }
     }
 
-    if (!existing) {
-      return { error: 'No account found with this email address.' }
-    }
-
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-    const supabase = await createClient()
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${siteUrl}/auth/confirm?next=/auth/reset-password`,
-    })
-
-    if (error) {
-      console.error('[requestPasswordReset] Supabase error object:', error)
-      const msg = error.message === '{}' || !error.message
-        ? 'Could not reach the authentication server. Please try again later.'
-        : error.message
-      return { error: msg }
+    if (exists) {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://scanwithveritas.tech'
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${siteUrl}/auth/confirm?next=/auth/reset-password`,
+      })
+      if (error) {
+        console.error('[requestPasswordReset] Supabase error object:', error)
+        return { error: 'Could not send a reset code. Please try again later.' }
+      }
     }
 
     return { error: '', success: true }
   } catch (err) {
     if (isNextInternalSignal(err)) throw err
     console.error('[requestPasswordReset]', err)
+    return { error: toMessage(err) }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Step 1: check the emailed code once and keep the recovery session.
+// ---------------------------------------------------------------------------
+export async function verifyResetCode(
+  _prevState: AuthResult,
+  formData: FormData
+): Promise<AuthResult> {
+  try {
+    const email = (formData.get('email') as string)?.trim().toLowerCase()
+    const code = (formData.get('code') as string)?.replace(/\s/g, '') ?? ''
+
+    if (!email) return { error: 'Email address is required.' }
+    if (!/^\d{6,10}$/.test(code))
+      return { error: 'Enter the verification code from your email.' }
+
+    const supabase = await createClient()
+    const verified = await supabase.auth.verifyOtp({
+      email,
+      token: code,
+      type: 'recovery',
+    })
+    if (verified.error) {
+      console.error('[verifyResetCode] verifyOtp:', verified.error.message)
+      return { error: 'That code is invalid or has expired. Request a new one.' }
+    }
+
+    return { error: '', success: true }
+  } catch (err) {
+    if (isNextInternalSignal(err)) throw err
+    console.error('[verifyResetCode]', err)
+    return { error: toMessage(err) }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Step 2: set the password on the open recovery session. A mismatch does
+// not require the code again.
+// ---------------------------------------------------------------------------
+export async function finishPasswordReset(
+  _prevState: AuthResult,
+  formData: FormData
+): Promise<AuthResult> {
+  try {
+    const password = formData.get('password') as string
+    const confirm = formData.get('confirmPassword') as string
+
+    if (!password || !confirm)
+      return { error: 'Please enter and confirm your new password.' }
+    if (password.length < 8)
+      return { error: 'Choose a password with at least 8 characters.' }
+    if (password !== confirm)
+      return { error: 'Those passwords do not match. Enter the same password in both fields.' }
+
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user)
+      return { error: 'Your reset session expired. Request a new code.' }
+
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) {
+      console.error('[finishPasswordReset] updateUser:', error.message)
+      return { error: 'Could not update your password. Try again with a different password.' }
+    }
+
+    await supabase.auth.signOut()
+    return { error: '', success: true }
+  } catch (err) {
+    if (isNextInternalSignal(err)) throw err
+    console.error('[finishPasswordReset]', err)
     return { error: toMessage(err) }
   }
 }
@@ -239,7 +303,7 @@ export async function signInWithProvider(
   flow: 'signin' | 'signup' = 'signup'
 ): Promise<void> {
   const supabase = await createClient()
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://scanwithveritas.tech'
   const queryParams: Record<string, string> = {}
   if (provider === 'google') {
     queryParams.prompt = 'select_account'
@@ -260,6 +324,63 @@ export async function signInWithProvider(
   }
 
   redirect(data.url)
+}
+
+// ---------------------------------------------------------------------------
+// Attach Google or GitHub to the account that is already signed in.
+// ---------------------------------------------------------------------------
+export async function linkProvider(formData: FormData): Promise<void> {
+  const provider = formData.get('provider')
+  if (provider !== 'google' && provider !== 'github') {
+    redirect('/account/security')
+  }
+
+  const supabase = await createClient()
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://scanwithveritas.tech'
+  const { data, error } = await supabase.auth.linkIdentity({
+    provider,
+    options: {
+      redirectTo: `${siteUrl}/auth/callback?flow=link`,
+    },
+  })
+
+  if (error || !data?.url) {
+    redirect(
+      `/account/security?error=${encodeURIComponent(error?.message ?? 'Could not connect that sign-in method.')}`
+    )
+  }
+
+  redirect(data.url)
+}
+
+export async function setAccountPassword(
+  _prevState: AuthResult,
+  formData: FormData
+): Promise<AuthResult> {
+  try {
+    const password = formData.get('password') as string
+    const confirm = formData.get('confirmPassword') as string
+
+    if (!password || !confirm)
+      return { error: 'Please enter and confirm a password.' }
+    if (password.length < 8)
+      return { error: 'Password must be at least 8 characters.' }
+    if (password !== confirm)
+      return { error: 'Passwords do not match.' }
+
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) return { error: 'Sign in before setting a password.' }
+
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) return { error: error.message || 'Could not set your password.' }
+    return { error: '', success: true }
+  } catch (err) {
+    if (isNextInternalSignal(err)) throw err
+    return { error: toMessage(err) }
+  }
 }
 
 // ---------------------------------------------------------------------------

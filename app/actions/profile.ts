@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { writeAudit } from "@/lib/audit";
+import { sendWelcomeEmail } from "@/lib/welcome-email";
 
 type ProfileResult = { error?: string; success?: boolean } | null;
 
@@ -14,6 +15,7 @@ export async function updateProfile(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthenticated." };
+  const firstSetup = user.user_metadata?.onboarded !== true;
 
   const displayName = (formData.get("username") as string)?.trim();
   const jobTitle = ((formData.get("job_title") as string) ?? "").trim();
@@ -46,5 +48,14 @@ export async function updateProfile(
   if (metaErr) return { error: metaErr.message };
 
   await writeAudit("profile.update", user.id, { display_name: displayName });
+
+  if (firstSetup && user.email) {
+    const provider = user.app_metadata?.provider;
+    const method = provider === "github" ? "GitHub" : provider === "google" ? "Google" : "Email & Password";
+    sendWelcomeEmail({ email: user.email, username: displayName, method }).catch((error) => {
+      console.error("[updateProfile] welcome email error:", error);
+    });
+  }
+
   return { success: true };
 }

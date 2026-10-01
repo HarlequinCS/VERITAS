@@ -184,7 +184,7 @@ export default async function DashboardPage() {
   return needsProfileSetup ? (
     <ProfileSetupForm currentUsername={username} email={userEmail} />
   ) : (
-    <main className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       {/* Global error banner */}
       {(authError || scanError) && (
         <div
@@ -214,13 +214,13 @@ export default async function DashboardPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/reports"
-            className="rounded-lg border border-veritas-border-subtle bg-veritas-surface/40 px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-veritas-electric/40 hover:text-white"
+            className="inline-flex h-11 items-center rounded-lg border border-veritas-border-subtle bg-veritas-surface/40 px-4 text-base font-medium text-slate-200 transition hover:border-veritas-electric/40 hover:text-white"
           >
             Build report
           </Link>
           <Link
             href="/targets/new"
-            className="rounded-lg bg-electric-mix px-3.5 py-2 text-xs font-semibold text-veritas-bg shadow-glow-electric transition hover:brightness-110"
+            className="inline-flex h-11 items-center rounded-lg bg-electric-mix px-4 text-base font-semibold text-veritas-bg shadow-glow-electric transition hover:brightness-110"
           >
             + Start scan
           </Link>

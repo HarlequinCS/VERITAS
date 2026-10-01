@@ -13,10 +13,50 @@ export type OrgContext = {
   status: string | null;
   requireMfa: boolean;
   canManageMembers: boolean;
+  isOwner: boolean;
+  description: string | null;
+  logoUrl: string | null;
+  slug: string | null;
 };
 
 export function canManageMembers(role: string | null | undefined) {
   return role === "owner" || role === "admin";
+}
+
+export type OrgMembership = {
+  orgId: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  logoUrl: string | null;
+  role: OrgRole;
+  status: string;
+  requireMfa: boolean;
+};
+
+export async function listMyOrganizations(): Promise<OrgMembership[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("my_organizations");
+  if (error || !data) return [];
+  return (data as {
+    org_id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    logo_url: string | null;
+    role: OrgRole;
+    status: string;
+    require_mfa: boolean;
+  }[]).map((row) => ({
+    orgId: row.org_id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description,
+    logoUrl: row.logo_url,
+    role: row.role,
+    status: row.status,
+    requireMfa: row.require_mfa,
+  }));
 }
 
 export async function getOrgContext(): Promise<OrgContext | null> {
@@ -32,35 +72,23 @@ export async function getOrgContext(): Promise<OrgContext | null> {
     .eq("user_id", user.id)
     .maybeSingle();
 
+  const memberships = await listMyOrganizations();
   const activeOrgId = (user.user_metadata?.active_org_id as string | undefined) ?? null;
-
-  let membershipQuery = supabase
-    .from("memberships")
-    .select("org_id, role, status, organizations(name, require_mfa)")
-    .eq("user_id", user.id)
-    .eq("status", "active");
-
-  if (activeOrgId) membershipQuery = membershipQuery.eq("org_id", activeOrgId);
-
-  const { data: membership } = await membershipQuery.limit(1).maybeSingle();
-
-  const org = membership?.organizations as
-    | { name: string; require_mfa: boolean }
-    | { name: string; require_mfa: boolean }[]
-    | null
-    | undefined;
-  const orgRow = Array.isArray(org) ? org[0] : org;
-  const role = (membership?.role as OrgRole | undefined) ?? null;
+  const current = memberships.find((org) => org.orgId === activeOrgId) ?? memberships[0] ?? null;
 
   return {
     userId: user.id,
     email: profile?.email ?? user.email ?? "",
     displayName: profile?.display_name || profile?.username || "User",
-    orgId: membership?.org_id ?? null,
-    orgName: orgRow?.name ?? null,
-    role,
-    status: membership?.status ?? null,
-    requireMfa: Boolean(orgRow?.require_mfa),
-    canManageMembers: canManageMembers(role),
+    orgId: current?.orgId ?? null,
+    orgName: current?.name ?? null,
+    role: current?.role ?? null,
+    status: current?.status ?? null,
+    requireMfa: current?.requireMfa ?? false,
+    canManageMembers: canManageMembers(current?.role),
+    isOwner: current?.role === "owner",
+    description: current?.description ?? null,
+    logoUrl: current?.logoUrl ?? null,
+    slug: current?.slug ?? null,
   };
 }

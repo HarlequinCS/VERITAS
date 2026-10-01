@@ -1,3 +1,4 @@
+import { SiteFooter } from "@/components/site-footer";
 import { UniversalNavbar } from "@/components/universal-navbar";
 
 export default function MarketingLayout({
@@ -9,6 +10,7 @@ export default function MarketingLayout({
     <>
       <UniversalNavbar />
       {children}
+      <SiteFooter />
     </>
   );
 }

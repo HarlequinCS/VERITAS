@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { publicOrigin } from '@/lib/public-origin'
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request })
@@ -44,7 +45,7 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/notifications')
 
   if (isAppRoute && !user) {
-    return NextResponse.redirect(new URL('/auth', request.url))
+    return NextResponse.redirect(new URL('/auth', publicOrigin(request)))
   }
 
   if (isAppRoute && user) {
@@ -53,19 +54,19 @@ export async function middleware(request: NextRequest) {
     const row = Array.isArray(access) ? access[0] : access
     const onAccount = request.nextUrl.pathname.startsWith('/account')
     if (row && (row.status === 'suspended' || row.status === 'removed') && !onAccount) {
-      return NextResponse.redirect(new URL('/account?status=suspended', request.url))
+      return NextResponse.redirect(new URL('/account?status=suspended', publicOrigin(request)))
     }
     if (row?.require_mfa && !onAccount) {
       const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
       if (aal?.currentLevel !== 'aal2') {
-        return NextResponse.redirect(new URL('/account/security', request.url))
+        return NextResponse.redirect(new URL('/account/security', publicOrigin(request)))
       }
     }
   }
 
   // Redirect /login to /auth for consistency
   if (request.nextUrl.pathname === '/login') {
-    return NextResponse.redirect(new URL('/auth', request.url))
+    return NextResponse.redirect(new URL('/auth', publicOrigin(request)))
   }
 
   // Redirect logged-in users away from /auth and /register
@@ -73,7 +74,7 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname === '/register'
 
   if (isAuthRoute && user) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/dashboard', publicOrigin(request)))
   }
 
   return response

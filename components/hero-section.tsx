@@ -1,69 +1,27 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { HeroGlobe } from "@/components/hero-globe";
 
-const THREAT_FEED = [
-  "[ SCAN ] Target accepted · session status: Pending",
-  "[ WORKER ] Celery claimed scan · status: Processing",
-  "[ PLAYWRIGHT ] Headless exploit simulation running",
-  "[ TRACE ] DOM mutation detected · visual PoC captured",
-  "[ AI ] CWE classified · remediation patch generated",
-  "[ TICKET ] Assigned to developer · pending verification",
-];
-
 export function HeroSection() {
   const [glitchDone, setGlitchDone] = useState(false);
-  const statsRef = useRef<HTMLDivElement>(null);
-  const [statsVisible, setStatsVisible] = useState(false);
-  const [threatOpen, setThreatOpen] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setGlitchDone(true), 400);
     return () => clearTimeout(t);
   }, []);
 
-  useEffect(() => {
-    const el = statsRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setStatsVisible(true);
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.3 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
   return (
     <section className="relative min-h-dvh overflow-hidden bg-veritas-bg">
-      {/* Moving Earth background. Hidden on small screens to keep mobile fast. */}
-      <div className="pointer-events-auto absolute inset-0 z-0 hidden cursor-grab opacity-80 active:cursor-grabbing md:block lg:opacity-95">
-        <div className="absolute -left-[18%] top-1/2 h-[110vh] w-[110vw] -translate-y-1/2 lg:-left-[10%] lg:w-[78vw]">
-          <HeroGlobe />
-        </div>
+      <div className="pointer-events-auto absolute inset-y-0 right-0 z-0 hidden w-[min(62vw,980px)] cursor-grab active:cursor-grabbing md:block">
+        <HeroGlobe />
       </div>
 
-      {/* Readability overlays */}
-      <div className="pointer-events-none absolute inset-0 z-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "radial-gradient(ellipse at 28% 50%, rgba(0,136,255,0.18) 0%, transparent 48%), linear-gradient(90deg, rgba(5,11,20,0.12) 0%, rgba(5,11,20,0.45) 45%, rgba(5,11,20,0.92) 78%)",
-          }}
-        />
-        <div className="absolute inset-0 grid-bg opacity-20" />
-      </div>
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-full max-w-3xl bg-gradient-to-r from-veritas-bg via-veritas-bg/85 to-transparent" />
 
-      <div className="pointer-events-none relative z-20 mx-auto flex min-h-dvh max-w-7xl flex-col justify-center px-4 pb-24 pt-28 sm:px-6 lg:items-end lg:px-8 lg:pt-0">
-        {/* Copy */}
-        <div className="pointer-events-auto max-w-xl lg:w-[46%]">
+      <div className="pointer-events-none relative z-20 mx-auto flex min-h-dvh max-w-6xl flex-col justify-center px-4 pb-16 pt-28 sm:px-6 lg:px-8 lg:pt-0">
+        <div className="pointer-events-auto max-w-xl">
           {/* Live tag */}
           <div className="inline-flex items-center gap-2 rounded-full border border-veritas-electric/30 bg-veritas-electric/10 px-3 py-1 mb-6 w-fit">
             <span className="relative flex h-2 w-2">
@@ -138,182 +96,12 @@ export function HeroSection() {
             </Link>
           </div>
 
-          {/* Proof stats */}
-          <div
-            ref={statsRef}
-            className="mt-12 border-t border-veritas-border-subtle/60 pt-8"
-          >
-            <div className="flex gap-8 sm:gap-12">
-              <StatValue
-                value="202"
-                label="Async Scan Sessions"
-                visible={statsVisible}
-              />
-              <StatValue
-                value="3"
-                label="AI Agent Loop"
-                visible={statsVisible}
-              />
-              <StatValue
-                value="1"
-                label="Solo Or Team Flow"
-                visible={statsVisible}
-              />
-            </div>
-          </div>
+          <p className="mt-8 max-w-xl border-t border-veritas-border-subtle/60 pt-8 text-base leading-relaxed text-slate-300">
+            Sign in to a workspace, invite the people who should see it, and review scans that belong to that account. This page does not show live customer totals.
+          </p>
         </div>
       </div>
 
-      {/* Threat intelligence overlay — collapsible */}
-      <div className="pointer-events-auto absolute left-4 bottom-20 z-20 hidden w-[360px] rounded-xl border border-veritas-border-subtle/70 bg-veritas-bg/70 shadow-card backdrop-blur-md lg:block">
-        <button
-          type="button"
-          onClick={() => setThreatOpen((o) => !o)}
-          className="flex w-full items-center justify-between gap-3 p-4 text-left"
-        >
-          <div className="min-w-0 flex-1">
-            <p className="font-label text-[10px] uppercase tracking-[0.18em] text-veritas-electric">
-              Global Threat Map
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              Real exploited CVEs mapped into scan context
-            </p>
-          </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/40 bg-rose-500/10 px-2 py-1 font-label text-[9px] font-semibold uppercase tracking-wider text-rose-300">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute h-full w-full animate-ping rounded-full bg-rose-400/70" />
-              <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
-            </span>
-            Active
-          </span>
-          <svg
-            className={`h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200 ${threatOpen ? "rotate-180" : ""}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-
-        {threatOpen && (
-          <div className="px-4 pb-4">
-            <div className="grid grid-cols-3 gap-3">
-              <ThreatMetric value="8" label="Exploit Routes" tone="text-veritas-electric" />
-              <ThreatMetric value="KEV" label="CISA Feed" tone="text-rose-300" />
-              <ThreatMetric value="AI" label="Patch Draft" tone="text-orange-300" />
-            </div>
-
-            <div className="mt-4 space-y-2 border-t border-veritas-border-subtle/60 pt-3">
-              <ThreatRow color="bg-rose-400" label="Red ring" value="known exploited CVE" />
-              <ThreatRow color="bg-orange-400" label="Orange arc" value="simulated attack path" />
-              <ThreatRow color="bg-veritas-electric" label="Blue node" value="your protected target" />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Ticker bar */}
-      <div className="absolute bottom-0 left-0 right-0 z-30 border-t border-veritas-border-subtle/60 bg-veritas-bg/80 backdrop-blur-md">
-        <div className="overflow-hidden py-3">
-          <div className="flex animate-ticker gap-12 whitespace-nowrap">
-            {[...THREAT_FEED, ...THREAT_FEED].map((item, i) => (
-              <span
-                key={i}
-                className="font-label text-[11px] text-slate-500 tracking-wide"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
     </section>
-  );
-}
-
-function ThreatMetric({
-  value,
-  label,
-  tone,
-}: {
-  value: string;
-  label: string;
-  tone: string;
-}) {
-  return (
-    <div className="rounded-lg border border-veritas-border-subtle/60 bg-veritas-surface/50 p-3">
-      <p className={`font-display text-xl font-bold ${tone}`}>{value}</p>
-      <p className="mt-1 font-label text-[9px] uppercase tracking-[0.14em] text-slate-500">
-        {label}
-      </p>
-    </div>
-  );
-}
-
-function ThreatRow({
-  color,
-  label,
-  value,
-}: {
-  color: string;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3 text-xs">
-      <span className="flex items-center gap-2 text-slate-300">
-        <span className={`h-2 w-2 rounded-full ${color}`} />
-        {label}
-      </span>
-      <span className="font-mono text-[10px] text-slate-500">{value}</span>
-    </div>
-  );
-}
-
-function StatValue({
-  value,
-  label,
-  visible,
-}: {
-  value: string;
-  label: string;
-  visible: boolean;
-}) {
-  const [count, setCount] = useState("0");
-  const parsed = parseFloat(value.replace(/[^0-9.]/g, ""));
-  const suffix = value.replace(/[0-9.]/g, "");
-
-  useEffect(() => {
-    if (!visible) return;
-    const isLarge = value.includes("M");
-    const target = isLarge ? 4.2 : parsed;
-    let start = 0;
-    const duration = 2000;
-    const step = Math.max(target / 60, 1);
-    const interval = setInterval(() => {
-      start += step;
-      if (start >= target) {
-        setCount(value);
-        clearInterval(interval);
-      } else {
-        setCount(
-          (isLarge ? start.toFixed(1) : Math.floor(start).toString()) + suffix,
-        );
-      }
-    }, duration / 60);
-    return () => clearInterval(interval);
-  }, [visible, parsed, suffix, value]);
-
-  return (
-    <div>
-      <p className="font-label text-2xl sm:text-3xl font-bold tracking-tight text-white tabular-nums">
-        {visible ? count : "0"}
-      </p>
-      <p className="mt-1 font-label text-[10px] uppercase tracking-[0.15em] text-slate-500">
-        {label}
-      </p>
-    </div>
   );
 }

@@ -4,7 +4,6 @@ import { ProductPreview } from "@/components/product-preview";
 import { HowItWorks } from "@/components/how-it-works";
 import { SocialProof } from "@/components/social-proof";
 import { CtaBanner } from "@/components/cta-banner";
-import { SiteFooter } from "@/components/site-footer";
 
 export default function HomePage() {
   return (
@@ -17,7 +16,6 @@ export default function HomePage() {
         <SocialProof />
         <CtaBanner />
       </main>
-      <SiteFooter />
     </div>
   );
 }

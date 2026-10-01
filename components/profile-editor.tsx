@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { updateProfile } from "@/app/actions/profile";
 
 const inputClass =
-  "h-11 w-full rounded-xl border border-veritas-border-subtle bg-veritas-surface/50 px-3.5 text-sm text-white outline-none transition focus:border-veritas-electric/50 focus:ring-1 focus:ring-veritas-electric/30";
+  "h-11 w-full rounded-xl border border-veritas-border-subtle bg-veritas-surface/50 px-3.5 text-base text-white outline-none transition focus:border-veritas-electric/50 focus:ring-1 focus:ring-veritas-electric/30";
 
 export function ProfileEditor({
   email,
@@ -29,29 +29,29 @@ export function ProfileEditor({
     <form action={formAction} className="mt-6 space-y-4">
       <Field label="Email" value={email} readOnly />
       <Field label="Role" value={roleLabel} readOnly />
-      <label className="block text-xs font-medium text-slate-400">
+      <label className="block text-sm font-medium text-slate-300">
         Display name
         <input name="username" required minLength={2} maxLength={40} defaultValue={displayName} className={`${inputClass} mt-1.5`} />
       </label>
-      <label className="block text-xs font-medium text-slate-400">
+      <label className="block text-sm font-medium text-slate-300">
         Job title
         <input name="job_title" maxLength={80} defaultValue={jobTitle} className={`${inputClass} mt-1.5`} />
       </label>
-      <label className="block text-xs font-medium text-slate-400">
+      <label className="block text-sm font-medium text-slate-300">
         Phone
         <input name="phone" maxLength={40} defaultValue={phone} className={`${inputClass} mt-1.5`} />
       </label>
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block text-xs font-medium text-slate-400">
+        <label className="block text-sm font-medium text-slate-300">
           Timezone
           <input name="timezone" maxLength={64} defaultValue={timezone} placeholder="Asia/Kuala_Lumpur" className={`${inputClass} mt-1.5`} />
         </label>
-        <label className="block text-xs font-medium text-slate-400">
+        <label className="block text-sm font-medium text-slate-300">
           Locale
           <input name="locale" maxLength={16} defaultValue={locale} placeholder="en" className={`${inputClass} mt-1.5`} />
         </label>
       </div>
-      {state?.error && <p className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs text-rose-300">{state.error}</p>}
+      {state?.error && <p className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">{state.error} Check the fields and try again.</p>}
       {state?.success && <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300">Profile saved.</p>}
       <button
         type="submit"
@@ -66,7 +66,7 @@ export function ProfileEditor({
 
 function Field({ label, value, readOnly }: { label: string; value: string; readOnly?: boolean }) {
   return (
-    <label className="block text-xs font-medium text-slate-400">
+    <label className="block text-sm font-medium text-slate-300">
       {label}
       <input defaultValue={value} readOnly={readOnly} className={`${inputClass} mt-1.5 text-slate-400`} />
     </label>

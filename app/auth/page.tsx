@@ -11,10 +11,8 @@ import {
   Fingerprint,
   Lock,
   Mail,
-  ShieldCheck,
 } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
-import Image from "next/image";
 import Link from "next/link";
 
 // ---------------------------------------------------------------------------
@@ -53,7 +51,6 @@ const GitHubIcon = (
   </svg>
 )
 
-const ICON_SRC = "https://saifuliqbal.dev/veritasicon.png";
 const initialState = { error: '' as string, success: false as boolean };
 
 export default function AuthPage() {
@@ -80,7 +77,8 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="relative isolate flex min-h-dvh items-stretch">
+    <div className="relative isolate flex min-h-dvh items-center justify-center px-4 py-10">
+      <div className="flex w-full max-w-[1120px] items-stretch overflow-hidden rounded-2xl border border-veritas-border-subtle/70 bg-veritas-bg/40">
       {/* Animated backdrop */}
       <div
         aria-hidden={true}
@@ -102,20 +100,20 @@ export default function AuthPage() {
       />
 
       {/* Left: Form */}
-      <main className="flex w-full items-center justify-center px-4 py-10 sm:px-8 lg:w-[55%]">
-        <div className="w-full max-w-[420px] animate-fade-up">
+      <main className="flex w-full max-w-[480px] items-center justify-center px-6 py-10 lg:w-[480px] lg:max-w-none lg:shrink-0">
+        <div className="w-full animate-fade-up">
           <div className="mb-10">
             <BrandLogo variant="hero" href="/" />
           </div>
 
           <div className="mb-8">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-veritas-electric/80">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-veritas-electric">
               Sign in
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">
               Sign in to VERITAS
             </h1>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-base text-slate-300">
               Access your scanner workspace to run scans, inspect evidence, and
               manage remediation.
             </p>
@@ -158,7 +156,7 @@ export default function AuthPage() {
           {/* ── Divider ─────────────────────────────────────────── */}
           <div className="flex items-center gap-3">
             <span className="h-px flex-1 bg-white/10" />
-            <span className="text-xs text-slate-500">or continue with email</span>
+            <span className="text-sm text-slate-300">or continue with email</span>
             <span className="h-px flex-1 bg-white/10" />
           </div>
 
@@ -166,7 +164,7 @@ export default function AuthPage() {
 
             {/* Email */}
             <label className="block">
-              <span className="mb-1.5 block text-xs font-medium text-slate-400">
+              <span className="mb-1.5 block text-sm font-medium text-slate-300">
                 Email address
               </span>
               <div className="relative">
@@ -175,9 +173,9 @@ export default function AuthPage() {
                   id="auth-email"
                   type="email"
                   name="email"
-                  placeholder="maya.khoury@acme.com"
+                  placeholder="you@example.com"
                   required
-                  className="h-11 w-full rounded-xl border border-veritas-border-subtle bg-veritas-surface/40 pl-10 pr-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-veritas-electric/50 focus:shadow-glow-electric"
+                  className="h-11 w-full rounded-xl border border-veritas-border-subtle bg-veritas-surface/40 pl-10 pr-3 text-base text-white outline-none transition placeholder:text-slate-400 focus:border-veritas-electric/50 focus:shadow-glow-electric"
                   autoComplete="email"
                 />
               </div>
@@ -185,13 +183,13 @@ export default function AuthPage() {
 
             {/* Password */}
             <label className="block">
-              <span className="mb-1.5 flex items-center justify-between text-xs">
-                <span className="font-medium text-slate-400">Password</span>
+              <span className="mb-1.5 flex items-center justify-between text-sm">
+                <span className="font-medium text-slate-300">Password</span>
                 <Link
                   href="/forgot-password"
-                  className="text-veritas-electric/80 transition hover:text-veritas-arc"
+                  className="text-veritas-electric transition hover:text-veritas-arc"
                 >
-                  Forgot?
+                  Forgot password
                 </Link>
               </span>
               <div className="relative">
@@ -202,19 +200,19 @@ export default function AuthPage() {
                   name="password"
                   placeholder="••••••••••••"
                   required
-                  className="h-11 w-full rounded-xl border border-veritas-border-subtle bg-veritas-surface/40 pl-10 pr-10 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-veritas-electric/50 focus:shadow-glow-electric"
+                  className="h-11 w-full rounded-xl border border-veritas-border-subtle bg-veritas-surface/40 pl-10 pr-12 text-base text-white outline-none transition placeholder:text-slate-400 focus:border-veritas-electric/50 focus:shadow-glow-electric"
                   autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-500 transition hover:bg-veritas-surface hover:text-slate-200"
+                  className="absolute right-0 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md text-slate-300 transition hover:bg-veritas-surface hover:text-white"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-3.5 w-3.5" />
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    <Eye className="h-3.5 w-3.5" />
+                    <Eye className="h-4 w-4" />
                   )}
                 </button>
               </div>
@@ -271,7 +269,7 @@ export default function AuthPage() {
       </main>
 
       {/* Right: Brand panel */}
-      <aside className="relative hidden flex-1 items-center justify-center overflow-hidden border-l border-veritas-border-subtle/70 bg-veritas-surface/30 px-10 lg:flex">
+      <aside className="relative hidden min-w-0 flex-1 items-center justify-center overflow-hidden border-l border-veritas-border-subtle/70 bg-veritas-surface/30 px-10 lg:flex">
         <div
           aria-hidden={true}
           className="absolute inset-0 grid-bg opacity-60"
@@ -283,64 +281,15 @@ export default function AuthPage() {
           }}
         />
         <div className="relative max-w-md">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              SOC 2 Type II
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-veritas-electric/30 bg-veritas-electric/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-veritas-electric">
-              <ShieldCheck className="h-3 w-3" />
-              ISO 27001
-            </span>
-          </div>
-
-          <h2 className="mt-6 text-3xl font-semibold tracking-tight text-white">
-            Detect. Prove. Patch.
+          <h2 className="text-3xl font-semibold tracking-tight text-white">
+            A workspace for your own applications.
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-slate-400">
-            VERITAS pairs asynchronous scan workers, Playwright evidence, and a
-            3-agent AI remediation loop so one developer can fix quickly, and a
-            team can assign and verify cleanly.
-          </p>
-
-          <div className="glass mt-8 rounded-2xl p-5">
-            <div className="mb-3 flex items-center gap-2">
-              <Image
-                src={ICON_SRC}
-                alt=""
-                width={20}
-                height={20}
-                className="opacity-90"
-              />
-              <p className="font-mono text-[11px] text-veritas-arc/80">
-                veritas.live · 02:41 UTC
-              </p>
-            </div>
-            <ul className="space-y-2 font-mono text-[11px] text-slate-300">
-              <li className="flex gap-3">
-                <span className="text-emerald-300">✓</span>
-                <span>Scan session: Pending → Processing</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-veritas-electric">●</span>
-                <span>Playwright: simulating /admin/users</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-veritas-arc">✦</span>
-                <span>AI loop: classify → synthesize → validate</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-rose-300">!</span>
-                <span>1 critical finding · CWE-285</span>
-              </li>
-            </ul>
-          </div>
-
-          <p className="mt-6 text-[11px] font-mono uppercase tracking-[0.22em] text-slate-500">
-            Build 2026.05.09 · region us-east-1
+          <p className="mt-3 text-base leading-relaxed text-slate-300">
+            Sign in to review scans that belong to your organization. This panel does not show a live scan.
           </p>
         </div>
       </aside>
+      </div>
     </div>
   );
 }

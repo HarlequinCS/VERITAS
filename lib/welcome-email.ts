@@ -67,7 +67,7 @@ export async function sendWelcomeEmail({
         <tr>
           <td class="pad" align="left" style="padding:16px 40px 0;">
             <p class="body" style="margin:0;font-size:14px;color:#94A3B8;line-height:1.7;">
-              You're now signed in with <strong style="color:#00CCFF;font-weight:600;">${method}</strong>. Your VERITAS workspace is configured and ready — no setup required.
+              You're signed in with <strong style="color:#00CCFF;font-weight:600;">${method}</strong>. Your profile is saved and your workspace is ready.
             </p>
             <p class="body" style="margin:14px 0 0;font-size:14px;color:#94A3B8;line-height:1.7;">
               Launch your first scan to discover vulnerabilities, capture visual proof, and receive AI-generated remediation patches — all within minutes.
@@ -81,7 +81,7 @@ export async function sendWelcomeEmail({
             <table cellpadding="0" cellspacing="0">
               <tr>
                 <td align="center" style="border-radius:10px;">
-                  <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/auth"
+                  <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? "https://scanwithveritas.tech"}/dashboard"
                      class="btn"
                      style="display:inline-block;padding:14px 40px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;background:linear-gradient(135deg,#0088FF,#00CCFF);">
                     Go to workspace

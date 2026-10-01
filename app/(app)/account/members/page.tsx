@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import { getOrgContext } from "@/lib/org";
-import { InviteForm } from "@/components/invite-form";
-import { setMemberStatus, updateMemberRole } from "@/app/actions/members";
+import { InviteForm, ResendInviteButton } from "@/components/invite-form";
+import { revokeInvite, setMemberStatus, updateMemberRole } from "@/app/actions/members";
 import { setRequireMfa } from "@/app/actions/security";
 
 export default async function MembersPage() {
@@ -11,6 +11,17 @@ export default async function MembersPage() {
 
   const { data: members } = ctx?.orgId
     ? await supabase.rpc("org_directory", { p_org: ctx.orgId })
+    : { data: [] };
+
+  const { data: invites } = ctx?.canManageMembers && ctx.orgId
+    ? await supabase
+        .from("invitations")
+        .select("id, email, role, expires_at, revoked_at, rejected_at, accepted_at")
+        .eq("org_id", ctx.orgId)
+        .is("accepted_at", null)
+        .is("revoked_at", null)
+        .is("rejected_at", null)
+        .order("created_at", { ascending: false })
     : { data: [] };
 
   const { data: events } = ctx?.canManageMembers && ctx.orgId
@@ -23,9 +34,9 @@ export default async function MembersPage() {
     : { data: [] };
 
   return (
-    <main className="mx-auto w-full max-w-[900px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <Link href="/account" className="text-xs text-slate-500 hover:text-white">Back to account</Link>
-      <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-veritas-electric/80">Members</p>
+    <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <Link href="/account" className="text-sm text-slate-300 hover:text-white">Back to account</Link>
+      <p className="mt-4 text-sm font-semibold uppercase tracking-[0.22em] text-veritas-electric">Members</p>
       <h1 className="mt-1.5 text-3xl font-semibold text-white">{ctx?.orgName ?? "Organization"}</h1>
       <p className="mt-2 text-sm text-slate-400">Roles are assigned here. A member cannot change their own role.</p>
 
@@ -39,6 +50,27 @@ export default async function MembersPage() {
               {ctx.requireMfa ? "Stop requiring MFA" : "Require MFA for this organization"}
             </button>
           </form>
+        </section>
+      )}
+
+      {ctx?.canManageMembers && (
+        <section className="glass mt-6 rounded-2xl p-5">
+          <h2 className="text-lg font-semibold text-white">Pending invites</h2>
+          <ul className="mt-4 space-y-3 text-base text-slate-300">
+            {(invites ?? []).length === 0 && <li>No pending invites.</li>}
+            {(invites ?? []).map((invite: { id: string; email: string; role: string; expires_at: string }) => (
+              <li key={invite.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-veritas-border-subtle px-3 py-3">
+                <span>{invite.email} · {invite.role} · expires {new Date(invite.expires_at).toLocaleDateString()}</span>
+                <span className="flex gap-2">
+                  <ResendInviteButton inviteId={invite.id} email={invite.email} />
+                  <form action={revokeInvite}>
+                    <input type="hidden" name="invite_id" value={invite.id} />
+                    <button type="submit" className="h-11 rounded-lg border border-rose-400/40 px-3 text-sm text-rose-200">Revoke</button>
+                  </form>
+                </span>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 
@@ -59,7 +91,7 @@ export default async function MembersPage() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="text-white">{member.display_name || member.username || member.email}</p>
-                    <p className="text-xs text-slate-500">{member.email} · {member.status}</p>
+                    <p className="text-sm text-slate-300">{member.email} · {member.status}</p>
                   </div>
                   <span className="text-slate-400">{member.role}</span>
                 </div>
@@ -67,18 +99,18 @@ export default async function MembersPage() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     <form action={updateMemberRole} className="flex gap-2">
                       <input type="hidden" name="user_id" value={member.user_id} />
-                      <select name="role" defaultValue={member.role} className="h-9 rounded-lg border border-veritas-border-subtle bg-veritas-surface/50 px-2 text-xs text-white">
+                      <select name="role" defaultValue={member.role} className="h-11 rounded-lg border border-veritas-border-subtle bg-veritas-surface/50 px-2 text-base text-white">
                         <option value="admin">admin</option>
                         <option value="analyst">analyst</option>
                         <option value="developer">developer</option>
                         <option value="viewer">viewer</option>
                       </select>
-                      <button type="submit" className="h-9 rounded-lg border border-veritas-border-subtle px-3 text-xs text-slate-200">Update role</button>
+                      <button type="submit" className="h-11 rounded-lg border border-veritas-border-subtle px-3 text-sm text-slate-200">Update role</button>
                     </form>
                     <form action={setMemberStatus}>
                       <input type="hidden" name="user_id" value={member.user_id} />
                       <input type="hidden" name="status" value={member.status === "suspended" ? "active" : "suspended"} />
-                      <button type="submit" className="h-9 rounded-lg border border-veritas-border-subtle px-3 text-xs text-amber-200">
+                      <button type="submit" className="h-11 rounded-lg border border-veritas-border-subtle px-3 text-sm text-amber-200">
                         {member.status === "suspended" ? "Restore" : "Suspend"}
                       </button>
                     </form>
@@ -98,7 +130,7 @@ export default async function MembersPage() {
             {(events ?? []).map((event: { id: string; action: string; target: string | null; created_at: string }) => (
               <li key={event.id} className="flex justify-between gap-3 border-b border-veritas-border-subtle/60 py-2">
                 <span>{event.action}{event.target ? ` · ${event.target}` : ""}</span>
-                <span className="shrink-0 text-xs text-slate-500">{new Date(event.created_at).toLocaleString()}</span>
+                <span className="shrink-0 text-sm text-slate-300">{new Date(event.created_at).toLocaleString()}</span>
               </li>
             ))}
           </ul>
